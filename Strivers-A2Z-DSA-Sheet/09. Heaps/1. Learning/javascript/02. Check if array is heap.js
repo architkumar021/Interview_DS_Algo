@@ -77,7 +77,7 @@ function isMaxHeap(arr, n) {
  */
 function isMaxHeapIterative(arr, n) {
     // Check all internal nodes (nodes with at least one child)
-    for (let i = 0; i <= Math.floor((n - 2) / 2); i++) {
+    for (let i = 0; i <= Math.floor(n / 2) - 1; i++) {
         const left = (2 * i) + 1;
         const right = (2 * i) + 2;
 
@@ -98,3 +98,5 @@ function isMaxHeapIterative(arr, n) {
 // console.log(isMaxHeap([90, 15, 10, 7, 12, 2], 6)); // Output: true
 // console.log(isMaxHeap([9, 15, 10, 7, 12, 11], 6)); // Output: false
 
+// Time Complexity: O(N)
+// Space Complexity: O(1)

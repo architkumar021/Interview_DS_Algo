@@ -35,6 +35,19 @@ class MinHeap {
         this.pq = [];
     }
 
+    // parent of node i is at index Math.floor((i - 1) / 2)
+    getParent(i) { return Math.floor((i - 1) / 2); }
+
+    // left child of node i is at index 2 * i + 1
+    getLeft(i) { return 2 * i + 1; }
+
+    // right child of node i is at index 2 * i + 2
+    getRight(i) { return 2 * i + 2; }
+
+    swap(i, j) {
+        [this.pq[i], this.pq[j]] = [this.pq[j], this.pq[i]];
+    }
+
     // Function to heapify the heap (top-down)
     heapify(node) {
         const leftChild = (2 * node) + 1;
