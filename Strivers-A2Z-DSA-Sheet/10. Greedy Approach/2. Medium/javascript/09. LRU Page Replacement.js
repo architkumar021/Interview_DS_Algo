@@ -244,3 +244,107 @@ console.log("\nBrute Force  - Page Faults:", lruPageFaultsBrute(pages2, capacity
 console.log("Optimal      - Page Faults:", lruPageFaultsOptimal(pages2, capacity2));    // 8
 console.log("TUF (DLL)    - Page Faults:", new LRUCache(capacity2).countPageFaults(pages2)); // 8
 
+
+// Class representing the LRU Cache
+class LRUCache {
+    // Constructor to initialize LRU cache
+    constructor(capacity) {
+        // Node constructor function
+        this.Node = function (_key, _val) {
+            return { key: _key, val: _val, next: null, prev: null };
+        };
+
+        // Head and tail dummy nodes
+        this.head = this.Node(-1, -1);
+        this.tail = this.Node(-1, -1);
+        this.head.next = this.tail;
+        this.tail.prev = this.head;
+
+        // Capacity of cache
+        this.cap = capacity;
+        // Hash map to store key-node mapping
+        this.m = new Map();
+    }
+
+    // Function to add a node right after head
+    addNode(newNode) {
+        let temp = this.head.next;
+        newNode.next = temp;
+        newNode.prev = this.head;
+        this.head.next = newNode;
+        temp.prev = newNode;
+    }
+
+    // Function to remove a given node from list
+    deleteNode(delNode) {
+        let delPrev = delNode.prev;
+        let delNext = delNode.next;
+        delPrev.next = delNext;
+        delNext.prev = delPrev;
+    }
+
+    // Function to get value from cache
+    get(key_) {
+        // If key exists in cache
+        if (this.m.has(key_)) {
+            let resNode = this.m.get(key_);
+            let res = resNode.val;
+            // Remove old mapping
+            this.m.delete(key_);
+            // Move accessed node to front
+            this.deleteNode(resNode);
+            this.addNode(resNode);
+            // Update map
+            this.m.set(key_, this.head.next);
+            return res;
+        }
+        // If not found
+        return -1;
+    }
+
+    // Function to put key-value into cache
+    put(key_, value) {
+        // If key already exists
+        if (this.m.has(key_)) {
+            let existingNode = this.m.get(key_);
+            this.m.delete(key_);
+            this.deleteNode(existingNode);
+        }
+        // If capacity reached
+        if (this.m.size === this.cap) {
+            this.m.delete(this.tail.prev.key);
+            this.deleteNode(this.tail.prev);
+        }
+        // Insert new node at front
+        this.addNode(this.Node(key_, value));
+        this.m.set(key_, this.head.next);
+    }
+}
+
+// Driver code
+let cache = new LRUCache(2);
+
+// Put values in cache
+cache.put(1, 1);
+cache.put(2, 2);
+
+// Get value for key 1
+console.log(cache.get(1));
+
+// Insert another key (evicts key 2)
+cache.put(3, 3);
+
+// Key 2 should be evicted
+console.log(cache.get(2));
+
+// Insert another key (evicts key 1)
+cache.put(4, 4);
+
+// Key 1 should be evicted
+console.log(cache.get(1));
+
+// Key 3 should be present
+console.log(cache.get(3));
+
+// Key 4 should be present
+console.log(cache.get(4));
