@@ -10,6 +10,10 @@ Approach:
 Complexity Analysis:
 - Since we are visiting each node once, the time complexity of this approach is O(N), where N is the number of nodes in the binary tree.
 - The space complexity is O(N) as we are using the call stack for recursion.
+  The worst case space complexity is O(N) when the tree is skewed.
+  The best case space complexity is O(logN) when the tree is balanced.
+  The auxiliary space complexity is O(logN) when the tree is balanced
+  i.e. height of the tree O(H) + O(N) for the result array.
 
 Code:
 */
@@ -28,3 +32,20 @@ function solve(root, ans) {
     solve(root.left, ans);
     solve(root.right, ans);
 }
+
+// Solution 2:
+var preorderTraversal = function(root) {
+    let ans = [];
+
+    function dfs(root) {
+        if(!root) return;
+
+        ans.push(root.val);
+        dfs(root.left);
+        dfs(root.right);
+    }
+
+    dfs(root);
+
+    return ans;
+};

@@ -3,45 +3,100 @@ Question:
 Given the root of a binary tree, return the postorder traversal of its nodes' values.
 
 Approach:
-- We can perform a postorder traversal iteratively using a stack and a map.
-- The idea is to push all the left children of a node into the stack until we reach a node with no left child.
-- Then, we check if the right child of the node exists or has already been visited (using the map).
-    - If it does not exist or has been visited, we add the node's value to the result array and pop the node from the stack.
-    - Otherwise, we push the right child into the stack and mark it as visited in the map.
-- We repeat this process until the stack is empty and all nodes are traversed.
+- Use two stacks.
+- Push root onto stack1. While stack1 is not empty:
+    - Pop a node from stack1, push it onto stack2.
+    - Push its left child then right child onto stack1.
+- Drain stack2 into the result — the reverse order gives Left → Right → Root (postorder).
 
 Complexity Analysis:
-- Since we visit each node once and perform constant time operations for each node, the time complexity of this approach is O(N), where N is the number of nodes in the binary tree.
-- The space complexity is also O(N) as we store the node values in the result array and use a stack and a map to keep track of the nodes.
+- Time:  O(N) — every node visited once.
+- Space: O(N) — two stacks hold at most N nodes total.
 
 Code:
 */
 
-function pushLeft(curr, stack, visited) {
-    while (curr) {
-        visited.set(curr, true);
-        stack.push(curr);
-        curr = curr.left;
-    }
-}
-
 function postorderTraversal(root) {
-    if (!root) {
-        return [];
-    }
     const ans = [];
-    const stack = [];
-    let curr = root;
-    const visited = new Map();
-    pushLeft(curr, stack, visited);
-    while (stack.length > 0) {
-        curr = stack[stack.length - 1];
-        if (!curr.right || visited.has(curr.right)) {
-            ans.push(curr.val);
-            stack.pop();
-        } else {
-            pushLeft(curr.right, stack, visited);
-        }
+    if (!root) return ans;
+
+    const stack1 = [root];
+    const stack2 = [];
+
+    while (stack1.length > 0) {
+        const node = stack1.pop();
+        stack2.push(node);
+        if (node.left)  stack1.push(node.left);
+        if (node.right) stack1.push(node.right);
     }
+
+    while (stack2.length > 0) {
+        ans.push(stack2.pop().val);
+    }
+
     return ans;
 }
+
+
+// ─────────────────────────────────────────────────────────────
+// ONE STACK SOLUTION
+// ─────────────────────────────────────────────────────────────
+/*
+Approach:
+- We simulate postorder (Left → Right → Root) using one stack
+  and a `prev` pointer that tracks the last visited node.
+- At each step we peek at the top of the stack (do NOT pop yet):
+
+  1. If the top node has a LEFT child we haven't gone into yet
+     → push left child and keep going left.
+
+  2. Else if the top node has a RIGHT child AND we didn't just
+     come back FROM that right child (prev !== top.right)
+     → push right child and explore right.
+
+  3. Otherwise both subtrees are done (or don't exist)
+     → pop and record the node, update prev to this node.
+
+Why track `prev`?
+- After we finish the right subtree and come back up, the top
+  of the stack is the parent. Without `prev` we'd push the
+  right child again. Checking `prev === top.right` tells us
+  "we already processed the right subtree — time to visit root".
+
+Time  Complexity: O(N) — each node pushed and popped once.
+Space Complexity: O(H) — stack holds at most H nodes (H = height).
+                  O(log N) balanced, O(N) skewed.
+*/
+
+function postorderTraversalOneStack(root) {
+    const ans = [];
+    if (!root) return ans;
+
+    const stack = [];
+    let curr = root;
+    let prev = null;    // Tracks the last visited node
+
+    while (curr || stack.length > 0) {
+
+        // Phase 1: Go all the way left
+        while (curr) {
+            stack.push(curr);
+            curr = curr.left;
+        }
+
+        // Peek at top — don't pop yet
+        const top = stack[stack.length - 1];
+
+        // Phase 2: If right subtree exists and not yet visited → go right
+        if (top.right && top.right !== prev) {
+            curr = top.right;
+        } else {
+            // Phase 3: Both subtrees done → visit node
+            ans.push(top.val);
+            prev = stack.pop();  // Mark this node as last visited
+        }
+    }
+
+    return ans;
+}
+
