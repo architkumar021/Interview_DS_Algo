@@ -1,36 +1,75 @@
 /*
 Question:
 Given the root of a binary tree, return the length of the diameter of the tree.
-
-Approach:
-- The diameter of a binary tree is the length of the longest path between any two nodes in the tree.
-- This path may or may not pass through the root.
-- To find the diameter of the tree, we can recursively calculate the height of each node's left and right subtrees.
-- At each node, we calculate the diameter as the maximum of the following three values:
-  - The diameter of the left subtree.
-  - The diameter of the right subtree.
-  - The sum of the heights of the left and right subtrees plus one (for the current node).
-- We update the diameter variable with the maximum diameter encountered during the traversal.
-
-Complexity Analysis:
-- Since we visit each node once and perform constant time operations for each node, the time complexity of this approach is O(N), where N is the number of nodes in the binary tree.
-- The space complexity is O(H), where H is the height of the binary tree. In the worst case, the tree can be skewed and have a height of N, resulting in O(N) space complexity. In the best case, the tree is balanced and has a height of log(N), resulting in O(log(N)) space complexity.
-
-Code:
+The diameter is the length of the longest path between any two nodes (counted in edges).
+This path may or may not pass through the root.
 */
 
-function maxDepth(root, diameterRef) {
-    if (!root) {
-        return 0;
-    }
-    const left = maxDepth(root.left, diameterRef);
-    const right = maxDepth(root.right, diameterRef);
-    diameterRef.value = Math.max(diameterRef.value, left + right);
-    return Math.max(left, right) + 1;
+// ─────────────────────────────────────────────────────────────
+// BRUTE FORCE — O(N²)
+// ─────────────────────────────────────────────────────────────
+/*
+Approach:
+- For every node, the diameter THROUGH it = height(left) + height(right).
+- Compute this at every node and track the global maximum.
+- height() is called separately for each node from scratch.
+
+Why O(N²)?
+- height() visits all nodes in a subtree → O(N) per node.
+- Called once for every node → O(N) × O(N) = O(N²) total.
+
+Time:  O(N²) — height recomputed from scratch at every node.
+Space: O(H)  — recursion stack.
+*/
+
+function height(node) {
+    if (!node) return 0;
+    return 1 + Math.max(height(node.left), height(node.right));
 }
 
+function diameterOfBinaryTreeBrute(root) {
+    if (!root) return 0;
+
+    // Diameter passing through current root
+    const throughRoot = height(root.left) + height(root.right);
+
+    // Diameter may lie entirely in left or right subtree
+    const leftDiameter  = diameterOfBinaryTreeBrute(root.left);
+    const rightDiameter = diameterOfBinaryTreeBrute(root.right);
+
+    return Math.max(throughRoot, leftDiameter, rightDiameter);
+}
+
+// ─────────────────────────────────────────────────────────────
+// OPTIMAL — O(N)
+// ─────────────────────────────────────────────────────────────
+/*
+Approach:
+- Compute height and diameter in the SAME single DFS pass.
+- For every node, the diameter through it = leftHeight + rightHeight.
+- Use a closure variable `maxDiameter` to track the global max.
+- Return the height upward so the parent can use it directly —
+  no need to recompute height separately.
+
+Why O(N)?
+- Each node is visited exactly once.
+- Height and diameter check happen together at each node.
+
+Time:  O(N) — single DFS pass.
+Space: O(H) — recursion stack.
+*/
+
 function diameterOfBinaryTree(root) {
-    const diameterRef = { value: 0 };
-    maxDepth(root, diameterRef);
-    return diameterRef.value;
+    let maxDiameter = 0;
+
+    function dfs(node) {
+        if (!node) return 0;
+        const left  = dfs(node.left);
+        const right = dfs(node.right);
+        maxDiameter = Math.max(maxDiameter, left + right); // Diameter through this node
+        return 1 + Math.max(left, right);                  // Return height to parent
+    }
+
+    dfs(root);
+    return maxDiameter;
 }

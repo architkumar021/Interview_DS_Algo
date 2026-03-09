@@ -1,54 +1,135 @@
 /*
 Question:
-Given the root of a binary tree, return the zigzag level order traversal of its nodes' values. (i.e., from left to right, then right to left for the next level and alternate between).
+Given the root of a binary tree, return the zigzag level order traversal of its nodes' values.
+(i.e., from left to right, then right to left for the next level and alternate between).
 
 Approach:
-- We can use a queue to perform a level order traversal of the binary tree.
-- To achieve the zigzag order, we can use a flag variable to keep track of the current direction (left to right or right to left) for each level.
-- Initialize a boolean variable `ltor` to true, where true represents the left to right direction.
-- While traversing each level, we store the values of the nodes in a temporary array.
-- If `ltor` is true, we push the left child first and then the right child into the queue for the next level.
-- If `ltor` is false, we push the right child first and then the left child into the queue for the next level.
-- After processing all the nodes in the current level, if `ltor` is false, we reverse the temporary array to achieve the right to left direction for the next level.
-- We alternate the value of `ltor` after processing each level to switch between left to right and right to left directions.
-- Finally, we return the array containing the zigzag level order traversal.
+- Use a queue for standard BFS level-order traversal.
+- Keep a `reverse` boolean flag — false means left→right, true means right→left.
+- For each level, instead of reversing the array after filling it, place each value
+  directly at its correct index:
+    - left→right (reverse=false): index = i
+    - right→left (reverse=true) : index = n - 1 - i
+- Push children (left then right) into the queue as normal regardless of direction.
+- Flip `reverse` after each level.
 
 Complexity Analysis:
-- Since we visit each node once and perform constant time operations for each node, the time complexity of this approach is O(N), where N is the number of nodes in the binary tree.
-- The space complexity is O(M), where M is the maximum number of nodes at any level in the binary tree. In the worst case, the maximum number of nodes at any level can be N/2 (in a complete binary tree), resulting in O(N) space complexity.
+- Time:  O(N) — each node visited once.
+- Space: O(N) — queue holds at most N/2 nodes at the widest level.
 
 Code:
 */
 
 function zigzagLevelOrder(root) {
-    if (!root) return []; // Empty tree, return an empty array
+    if (!root) return [];
 
-    const ans = []; // Array to store the zigzag level order traversal
-    const queue = []; // Queue for level order traversal
+    const ans = [];
+    const queue = [];
     queue.push(root);
-    let ltor = true; // Flag variable to track the current direction (left to right or right to left)
+    let reverse = false;
 
     while (queue.length > 0) {
-        const n = queue.length; // Number of nodes at the current level
-        const levelValues = []; // Temporary array to store the values of nodes at the current level
+        const n = queue.length;
+        const level = new Array(n);
 
         for (let i = 0; i < n; i++) {
             const curr = queue.shift();
-
-            levelValues.push(curr.val);
-
-            if (curr.left) queue.push(curr.left);
+            const index = reverse ? n - 1 - i : i;  // Place at correct position directly
+            level[index] = curr.val;
+            if (curr.left)  queue.push(curr.left);
             if (curr.right) queue.push(curr.right);
         }
 
-        if (!ltor) {
-            levelValues.reverse(); // Reverse the values to achieve right to left direction
-        }
-
-        ans.push(levelValues);
-
-        ltor = !ltor; // Alternate the direction for the next level
+        ans.push(level);
+        reverse = !reverse;
     }
 
     return ans;
 }
+
+
+// Class to represent a binary tree node
+class TreeNode {
+    constructor(x) {
+        this.val = x;        // Value of the node
+        this.left = null;    // Pointer to left child
+        this.right = null;   // Pointer to right child
+    }
+}
+
+class Solution {
+    // Function to perform zigzag (spiral) level order traversal
+    zigzagLevelOrder(root) {
+        // Array to store the final zigzag traversal result
+        const result = [];
+
+        // If tree is empty, return empty array
+        if (!root) return result;
+
+        // Queue for BFS traversal
+        const q = [root];
+
+        // Boolean flag to control traversal direction
+        let leftToRight = true;
+
+        // Loop until all levels are processed
+        while (q.length > 0) {
+            // Get the number of nodes at the current level
+            const size = q.length;
+
+            // Temporary array to store current level's values
+            const level = new Array(size);
+
+            // Process each node in the current level
+            for (let i = 0; i < size; i++) {
+                // Remove first node from queue
+                const node = q.shift();
+
+                // Determine index where this value should be stored
+                const index = leftToRight ? i : size - 1 - i;
+                level[index] = node.val;
+
+                // Add left child to queue if it exists
+                if (node.left) q.push(node.left);
+                // Add right child to queue if it exists
+                if (node.right) q.push(node.right);
+            }
+
+            // Flip traversal direction for next level
+            leftToRight = !leftToRight;
+
+            // Add current level to final result
+            result.push(level);
+        }
+
+        // Return zigzag traversal result
+        return result;
+    }
+}
+
+// Driver code
+function main() {
+    // Create binary tree:
+    //        1
+    //      /   \
+    //     2     3
+    //    / \     \
+    //   4   5     6
+    let root = new TreeNode(1);
+    root.left = new TreeNode(2);
+    root.right = new TreeNode(3);
+    root.left.left = new TreeNode(4);
+    root.left.right = new TreeNode(5);
+    root.right.right = new TreeNode(6);
+
+    // Create solution object
+    let sol = new Solution();
+
+    // Get zigzag traversal
+    let ans = sol.zigzagLevelOrder(root);
+
+    // Print result
+    console.log(ans);
+}
+
+main();
