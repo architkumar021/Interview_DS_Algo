@@ -2,7 +2,10 @@
 
 // Given the head of a linked list, remove the nth node from the end of the list and return its head.
 
+ 
+
 // Example 1:
+
 
 // Input: head = [1,2,3,4,5], n = 2
 // Output: [1,2,3,5]
@@ -26,55 +29,110 @@
 
 // Follow up: Could you do this in one pass?
 
-class ListNode {
-    constructor(data) {
-        this.value = data,
-        this.next = null
-    }
-};
-
-const head = new ListNode(10);
-let current = head;
-
-current.next = new ListNode(3);
-current = current.next;
-
-current.next = new ListNode(4);
-current = current.next;
-
-current.next = new ListNode(7);
-current = current.next;
-
-current.next = new ListNode(1);
-current = current.next;
-
-current.next = new ListNode(2);
-current = current.next;
-
-current.next = new ListNode(6);
-current = current.next;
-
+// 2 pass solution
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val, next) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.next = (next===undefined ? null : next)
+ * }
+ */
 /**
  * @param {ListNode} head
  * @param {number} n
  * @return {ListNode}
  */
 var removeNthFromEnd = function(head, n) {
-    let fast = head;
-    let slow = head
-    for (let i = 0; i < n; i++) {
-        fast = fast.next;
+    if (!head) return head;
+
+    let length = 0;
+    let current = head;
+
+    while (current) {
+        length++;
+        current = current.next;
     }
-    if (!fast) {
+
+    let nodeFromStart = length - n + 1;
+
+    // Edge case: remove the head
+    if (nodeFromStart === 1) {
         return head.next;
     }
 
-    while (fast.next) {
-        fast = fast.next;
-        slow = slow.next;
+    current = head;
+    let count = 1;
+
+    while (current) {
+        if (count + 1 === nodeFromStart) {
+            current.next = current.next.next;
+            break;
+        }
+        current = current.next;
+        count++;
     }
-    slow.next = slow.next.next;
+
     return head;
 };
 
-console.log(removeNthFromEnd(head, 2));
+// 1 pass solution
+// 
+
+var removeNthFromEnd = function(head, n) {
+    // Edge case: if the list is empty or has only one node,
+    // removing the nth node from the end means returning null
+    if (!head || !head.next) return head.next;
+
+    // Initialize two pointers at the start of the list
+    let slow = head;
+    let fast = head;
+
+    // Move the `fast` pointer `n` steps ahead
+    // This creates a gap of `n` between `slow` and `fast`
+    for (let i = 0; i < n; i++) {
+        fast = fast.next;
+    }
+
+    // If `fast` is null after moving `n` steps, it means
+    // we need to remove the head node (n == length of list)
+    if (!fast) return head.next;
+
+    // Move both `slow` and `fast` one step at a time
+    // until `fast` reaches the last node
+    while (fast && fast.next) {
+        slow = slow.next;
+        fast = fast.next;
+    }
+
+    // Now `slow` is just before the node to remove
+    // Skip the target node by pointing to the next-next node
+    slow.next = slow.next.next;
+
+    // Return the (possibly unchanged) head of the list
+    return head;
+};
+
+
+// Another solution:  Add a dummy node before the head to simplify edge case handling (especially head removal).
+var removeNthFromEnd = function(head, n) {
+    let dummy = new ListNode(0);
+    dummy.next = head;
+
+    let slow = dummy;
+    let fast = dummy;
+
+    // Move fast n+1 steps ahead so that slow is right before the target node
+    for (let i = 0; i <= n; i++) {
+        fast = fast.next;
+    }
+
+    while (fast) {
+        slow = slow.next;
+        fast = fast.next;
+    }
+
+    // Skip the target node
+    slow.next = slow.next.next;
+
+    return dummy.next;
+};

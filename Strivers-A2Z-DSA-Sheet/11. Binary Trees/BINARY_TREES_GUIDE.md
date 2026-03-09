@@ -2,7 +2,7 @@
 
 > **Purpose:** A consolidated reference book covering every key Binary Tree concept, pattern, approach and complexity. Sync'd with all latest JavaScript solution files.
 
----
+* ---
 
 ## 📚 Table of Contents
 
