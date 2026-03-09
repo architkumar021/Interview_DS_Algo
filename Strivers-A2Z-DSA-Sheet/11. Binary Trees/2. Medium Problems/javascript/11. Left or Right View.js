@@ -32,7 +32,8 @@ function rightSideView(root) {
             if (curr.right) {
                 queue.push(curr.right);
             }
-            // Add only the last node of the level to the answer for right view in case of left view push only the first element
+            // Add only the last node of the level to the answer for right view
+            // in case of left view push only the first element
             if (i === n - 1) {
                 ans.push(curr.val);
             }
