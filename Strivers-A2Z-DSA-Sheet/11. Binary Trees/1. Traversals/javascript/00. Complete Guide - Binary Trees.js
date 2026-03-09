@@ -1,6 +1,8 @@
 /*
 ============================================================
       BINARY TREE — COMPLETE GUIDE (JavaScript)
+      Sync'd with all latest solution files.
+      For a printable version → see BINARY_TREES_GUIDE.md
 ============================================================
 
 TABLE OF CONTENTS:
@@ -12,19 +14,21 @@ TABLE OF CONTENTS:
  6.  Level Order Traversal (BFS)
  7.  All-in-One Traversal (single DFS pass)
  8.  Height & Depth of Tree
- 9.  Diameter of Binary Tree
-10.  Check if Tree is Balanced (Height-Balanced)
-11.  Check if Tree is Symmetric / Mirror
-12.  Count Total Nodes
+ 9.  Diameter of Binary Tree          [Brute O(N²) + Optimal O(N)]
+10.  Check if Tree is Balanced        [Brute O(N²) + Optimal O(N)]
+11.  Check if Tree is Symmetric       [Recursive + Iterative Stack]
+12.  Same Tree
 13.  Maximum Path Sum
 14.  Lowest Common Ancestor (LCA)
 15.  Zigzag (Spiral) Level Order Traversal
-16.  Left / Right / Top / Bottom View
-17.  Boundary Traversal
-18.  Vertical Order Traversal
-19.  Morris Inorder Traversal (O(1) space)
-20.  Serialize & Deserialize Binary Tree
-21.  Complexity Summary
+16.  Left / Right View
+17.  Top View                         [O(N log N) + O(N)]
+18.  Bottom View                      [O(N log N) + O(N)]
+19.  Boundary Traversal
+20.  Vertical Order Traversal
+21.  Morris Inorder Traversal (O(1) space)
+22.  Serialize & Deserialize Binary Tree
+23.  Complexity Summary
 ============================================================
 */
 
@@ -148,9 +152,6 @@ function buildTreeFromArray(arr) {
     return root;
 }
 
-// Usage example:
-// const root = buildTreeFromArray([1, 2, 3, 4, 5, null, 6]);
-
 
 // ============================================================
 // 4. RECURSIVE TRAVERSALS
@@ -164,7 +165,7 @@ node is visited relative to its children:
   Postorder → Left  → Right → Root    (used to DELETE a tree)
 
 Time  Complexity: O(N) — every node visited once
-Space Complexity: O(H) — recursion call stack (H = height)
+Space Complexity: O(H) — recursion call stack
                   O(N) worst case for skewed tree
                   O(log N) for balanced tree
 */
@@ -174,7 +175,7 @@ function preorderRecursive(root) {
     const result = [];
     function dfs(node) {
         if (!node) return;
-        result.push(node.val);   // Visit root FIRST
+        result.push(node.val);  // Visit root FIRST
         dfs(node.left);
         dfs(node.right);
     }
@@ -188,7 +189,7 @@ function inorderRecursive(root) {
     function dfs(node) {
         if (!node) return;
         dfs(node.left);
-        result.push(node.val);   // Visit root IN MIDDLE
+        result.push(node.val);  // Visit root IN MIDDLE
         dfs(node.right);
     }
     dfs(root);
@@ -202,7 +203,7 @@ function postorderRecursive(root) {
         if (!node) return;
         dfs(node.left);
         dfs(node.right);
-        result.push(node.val);   // Visit root LAST
+        result.push(node.val);  // Visit root LAST
     }
     dfs(root);
     return result;
@@ -214,76 +215,103 @@ function postorderRecursive(root) {
 // ============================================================
 /*
 Why iterative?
-- Avoids stack-overflow risk on very deep / skewed trees
-- Gives explicit control over traversal state
+- Avoids stack-overflow risk on very deep / skewed trees.
+- stack.pop() is O(1) vs queue.shift() O(N).
 */
 
 // ── 5a. Iterative Preorder ──
-/*
-Approach:
-- Push root onto stack.
-- Pop node → record value → push RIGHT child, then LEFT child.
-  (Push right before left so left is processed first — LIFO order)
-*/
+// Push root → pop → record → push RIGHT then LEFT (LIFO = left processed first)
 function preorderIterative(root) {
     if (!root) return [];
-    const result = [];
-    const stack = [root];
+    const result = [], stack = [root];
     while (stack.length > 0) {
         const node = stack.pop();
         result.push(node.val);
-        if (node.right) stack.push(node.right); // push right FIRST
-        if (node.left)  stack.push(node.left);  // push left SECOND (processed first)
+        if (node.right) stack.push(node.right); // right FIRST
+        if (node.left)  stack.push(node.left);  // left SECOND → processed first
     }
     return result;
 }
 
 // ── 5b. Iterative Inorder ──
-/*
-Approach:
-- Drill down the left spine, pushing every node to the stack.
-- Pop a node → record value → move to its right child.
-- Repeat: drill down left spine of right subtree.
-*/
+// Drill left spine → pop → record → move right → repeat
 function inorderIterative(root) {
-    const result = [];
+    const ans = [];
     const stack = [];
     let curr = root;
     while (curr || stack.length > 0) {
-        // Go all the way left
-        while (curr) {
+        while (curr) {          // Go all the way left
             stack.push(curr);
             curr = curr.left;
         }
         curr = stack.pop();
-        result.push(curr.val);  // Visit node
+        ans.push(curr.val);     // Visit node
         curr = curr.right;      // Move to right subtree
     }
-    return result;
+    return ans;
 }
 
-// ── 5c. Iterative Postorder (Two-Stack Method) ──
+// ── 5c. Iterative Postorder — Two-Stack ──
 /*
 Approach:
-- Similar to preorder but push LEFT before RIGHT.
-- Collect results in stack2 (reverses the order to get post-order).
-- Drain stack2 into result array.
+- Push root onto stack1. While stack1 is not empty:
+    - Pop a node from stack1, push it onto stack2.
+    - Push its left child then right child onto stack1.
+- Drain stack2 into result — reverse order gives Left → Right → Root.
+
+Time:  O(N)  |  Space: O(N) — two stacks hold at most N nodes total.
 */
 function postorderIterative(root) {
-    if (!root) return [];
-    const result = [];
-    const stack1 = [root];
-    const stack2 = [];
+    const ans = [];
+    if (!root) return ans;
+    const stack1 = [root], stack2 = [];
     while (stack1.length > 0) {
         const node = stack1.pop();
         stack2.push(node);
         if (node.left)  stack1.push(node.left);
         if (node.right) stack1.push(node.right);
     }
-    while (stack2.length > 0) {
-        result.push(stack2.pop().val);
+    while (stack2.length > 0) ans.push(stack2.pop().val);
+    return ans;
+}
+
+// ── 5d. Iterative Postorder — One Stack + prev pointer ──
+/*
+Approach:
+- Use one stack and a `prev` pointer tracking the last visited node.
+- Peek at top (do NOT pop yet) at each step:
+  1. Top has a left child we haven't gone into → push left, keep going left.
+  2. Top has a right child AND we didn't just come back from it
+     (prev !== top.right) → go right.
+  3. Otherwise both subtrees are done → pop and record, update prev.
+
+Why prev?
+- After finishing the right subtree and coming back up, top.right === prev
+  tells us "right subtree done → time to visit root".
+  Without prev we'd re-push the right child infinitely.
+
+Time:  O(N)  |  Space: O(H) — stack holds at most H nodes.
+*/
+function postorderOneStack(root) {
+    const ans = [];
+    if (!root) return ans;
+    const stack = [];
+    let curr = root, prev = null;
+    while (curr || stack.length > 0) {
+        // Phase 1: Go all the way left
+        while (curr) { stack.push(curr); curr = curr.left; }
+        // Peek at top — don't pop yet
+        const top = stack[stack.length - 1];
+        // Phase 2: Right subtree exists and not yet visited → go right
+        if (top.right && top.right !== prev) {
+            curr = top.right;
+        } else {
+            // Phase 3: Both subtrees done → visit node
+            ans.push(top.val);
+            prev = stack.pop();
+        }
     }
-    return result;
+    return ans;
 }
 
 
@@ -291,20 +319,13 @@ function postorderIterative(root) {
 // 6. LEVEL ORDER TRAVERSAL (BFS)
 // ============================================================
 /*
-Approach:
-- Use a Queue (FIFO).
-- Process level by level: snapshot queue size at start of each
-  iteration — that many nodes belong to the current level.
-
-Time  Complexity: O(N)
-Space Complexity: O(N) — at most N/2 nodes in queue (last level)
+Time: O(N)  |  Space: O(N) — at most N/2 nodes in queue (last level)
 */
 function levelOrder(root) {
     if (!root) return [];
-    const result = [];
-    const queue = [root];
+    const result = [], queue = [root];
     while (queue.length > 0) {
-        const levelSize = queue.length;
+        const levelSize = queue.length; // Snapshot = nodes at this level
         const level = [];
         for (let i = 0; i < levelSize; i++) {
             const node = queue.shift();
@@ -322,44 +343,34 @@ function levelOrder(root) {
 // 7. ALL-IN-ONE TRAVERSAL (Single DFS Pass)
 // ============================================================
 /*
-Compute Preorder, Inorder, and Postorder in ONE DFS pass
-using a state counter per node:
-  state 1 → record for Preorder,  then recurse left
-  state 2 → record for Inorder,   then recurse right
-  state 3 → record for Postorder, then pop from stack
+Compute Preorder, Inorder, and Postorder in ONE pass using a
+state counter per node on the stack:
+  state 1 → record for Preorder,  push left child
+  state 2 → record for Inorder,   push right child
+  state 3 → record for Postorder, pop node
 
-Approach:
-- Push (node, state=1) onto stack.
-- Each iteration: read top element.
-  - If state is 1: add to pre-result, increment state, push left child.
-  - If state is 2: add to in-result,  increment state, push right child.
-  - If state is 3: add to post-result, pop from stack.
-
-Time  Complexity: O(3N) ≈ O(N)
-Space Complexity: O(N)
+Time: O(3N) ≈ O(N)  |  Space: O(N)
 */
 function allInOneTraversal(root) {
     const pre = [], ino = [], post = [];
     if (!root) return [pre, ino, post];
 
-    // Stack stores [node, visitCount]
+    // Stack stores [node, state]
     const stack = [[root, 1]];
 
     while (stack.length > 0) {
-        const top = stack[stack.length - 1];
-        const [node, state] = top;
+        const [node, state] = stack.pop();
 
         if (state === 1) {
-            pre.push(node.val);       // Preorder: record now
-            top[1]++;                  // Move to state 2
-            if (node.left) stack.push([node.left, 1]);
+            pre.push(node.val);                         // Preorder: record now
+            stack.push([node, 2]);                      // Re-push with next state
+            if (node.left) stack.push([node.left, 1]);  // Push left child
         } else if (state === 2) {
-            ino.push(node.val);       // Inorder: record now
-            top[1]++;                  // Move to state 3
-            if (node.right) stack.push([node.right, 1]);
+            ino.push(node.val);                          // Inorder: record now
+            stack.push([node, 3]);                       // Re-push with next state
+            if (node.right) stack.push([node.right, 1]);// Push right child
         } else {
-            post.push(node.val);      // Postorder: record now
-            stack.pop();               // Done with this node
+            post.push(node.val);                         // Postorder: record now, pop
         }
     }
     return [pre, ino, post];
@@ -370,25 +381,36 @@ function allInOneTraversal(root) {
 // 8. HEIGHT & DEPTH OF TREE
 // ============================================================
 /*
-Height of a node = length of longest path from that node to a leaf.
-  - Height of leaf = 0
-  - Height of empty (null) = -1
+Height of null = -1  |  Height of leaf = 0
+Depth  of root = 0
 
-Depth of a node  = length of path from root to that node.
-  - Depth of root = 0
+NOTE: LeetCode maxDepth counts NODES (not edges), so it = height + 1.
 
-Approach (recursive height):
-- height(node) = 1 + max(height(left), height(right))
-- Base case: height(null) = -1
-
-Time  Complexity: O(N)
-Space Complexity: O(H)
+Time: O(N)  |  Space: O(H)
 */
+
+// Height (edge count) — returns -1 for null
 function heightOfTree(root) {
     if (!root) return -1;
-    const leftHeight  = heightOfTree(root.left);
-    const rightHeight = heightOfTree(root.right);
-    return 1 + Math.max(leftHeight, rightHeight);
+    return 1 + Math.max(heightOfTree(root.left), heightOfTree(root.right));
+}
+
+// LeetCode #104 — counts NODES along longest root-to-leaf path
+function maxDepth(root) {
+    if (!root) return 0;
+    return 1 + Math.max(maxDepth(root.left), maxDepth(root.right));
+}
+
+// Alternative DFS approach — track depth explicitly via parameter
+function maxDepthDFS(root) {
+    let result = 0;
+    function dfs(node, depth) {
+        if (!node) { result = Math.max(result, depth); return; }
+        dfs(node.left,  depth + 1);
+        dfs(node.right, depth + 1);
+    }
+    dfs(root, 0);
+    return result;
 }
 
 // Find depth of a target node value
@@ -405,87 +427,100 @@ function depthOfNode(root, target, depth = 0) {
 // 9. DIAMETER OF BINARY TREE
 // ============================================================
 /*
-Diameter = longest path between ANY two nodes in the tree.
-The path MAY or MAY NOT pass through the root.
+Diameter = longest path between ANY two nodes (edge count).
+May or may NOT pass through root.
+*/
 
-Approach:
-- For every node: diameter through it = leftHeight + rightHeight + 2
-  (the +2 counts the two edges connecting node to left/right subtrees)
-- Track a global maximum across all nodes.
-- Compute height and diameter simultaneously in one DFS pass.
+// ── Brute Force — O(N²) ──
+/*
+For every node, recompute height of left and right subtrees separately.
+diameter_through_node = height(left) + height(right)
+Then recurse on left/right to check if max lies in a subtree.
+height() is O(N) per node → O(N) × O(N) = O(N²) total.
+*/
+function heightForDiameter(node) {
+    if (!node) return 0;
+    return 1 + Math.max(heightForDiameter(node.left), heightForDiameter(node.right));
+}
+function diameterBrute(root) {
+    if (!root) return 0;
+    const throughRoot = heightForDiameter(root.left) + heightForDiameter(root.right);
+    return Math.max(throughRoot, diameterBrute(root.left), diameterBrute(root.right));
+}
 
-Why combine? If we compute height separately for each node:
-  Time = O(N²). Combining makes it O(N).
-
-Time  Complexity: O(N)
-Space Complexity: O(H)
+// ── Optimal — O(N) ──
+/*
+Height + diameter computed TOGETHER in ONE DFS pass via closure.
+- dfs(node) returns the height of that subtree.
+- At each node, diameter through it = left + right (heights returned from children).
+- maxDiameter closure variable tracks the global max.
 */
 function diameterOfBinaryTree(root) {
     let maxDiameter = 0;
-
-    function dfsHeight(node) {
-        if (!node) return -1;
-        const lh = dfsHeight(node.left);
-        const rh = dfsHeight(node.right);
-        // Diameter through current node (in terms of edges)
-        maxDiameter = Math.max(maxDiameter, lh + rh + 2);
-        return 1 + Math.max(lh, rh);
+    function dfs(node) {
+        if (!node) return 0;
+        const left  = dfs(node.left);
+        const right = dfs(node.right);
+        maxDiameter = Math.max(maxDiameter, left + right); // diameter through this node
+        return 1 + Math.max(left, right);                  // height returned to parent
     }
-
-    dfsHeight(root);
+    dfs(root);
     return maxDiameter;
 }
 
 
 // ============================================================
-// 10. CHECK IF TREE IS BALANCED (HEIGHT-BALANCED)
+// 10. CHECK IF TREE IS BALANCED
 // ============================================================
 /*
-A tree is height-balanced if for every node:
+A tree is height-balanced if for EVERY node:
   |height(left subtree) - height(right subtree)| ≤ 1
-
-Naive Approach (O(N²)):
-- At every node, compute height of left and right subtrees separately.
-- If difference > 1 at any node → not balanced.
-
-Optimal Approach (O(N)):
-- Return -2 (sentinel) when an imbalance is detected during DFS.
-- This way we short-circuit and avoid redundant work.
-
-Time  Complexity: O(N)
-Space Complexity: O(H)
 */
-function isBalanced(root) {
-    function checkHeight(node) {
-        if (!node) return -1;
-        const lh = checkHeight(node.left);
-        if (lh === -2) return -2;  // Propagate imbalance upward
 
-        const rh = checkHeight(node.right);
-        if (rh === -2) return -2;
-
-        if (Math.abs(lh - rh) > 1) return -2;  // Imbalance detected here
-        return 1 + Math.max(lh, rh);
-    }
-    return checkHeight(root) !== -2;
+// ── Brute Force — O(N²) ──
+/*
+Compute height separately at every node → height() is called O(N)
+times, each costing O(N) → O(N²) total.
+*/
+function heightForBalance(node) {
+    if (!node) return 0;
+    return 1 + Math.max(heightForBalance(node.left), heightForBalance(node.right));
 }
+function isBalancedBrute(root) {
+    if (!root) return true;
+    const lh = heightForBalance(root.left), rh = heightForBalance(root.right);
+    return Math.abs(lh - rh) <= 1
+        && isBalancedBrute(root.left)
+        && isBalancedBrute(root.right);
+}
+
+// ── Optimal — O(N) with -1 sentinel ──
+/*
+Returns actual height if balanced, or -1 if imbalance detected.
+-1 short-circuits immediately — no further nodes visited.
+*/
+function getHeight(node) {
+    if (!node) return 0;
+    const left  = getHeight(node.left);
+    if (left  === -1) return -1;                // Propagate imbalance up
+    const right = getHeight(node.right);
+    if (right === -1) return -1;
+    if (Math.abs(left - right) > 1) return -1;  // Imbalance at this node
+    return 1 + Math.max(left, right);
+}
+function isBalanced(root) { return getHeight(root) !== -1; }
 
 
 // ============================================================
 // 11. CHECK IF TREE IS SYMMETRIC / MIRROR
 // ============================================================
 /*
-A tree is symmetric if the left subtree is a mirror of the right
-subtree at every level.
-
-Approach:
-- Compare left.left with right.right  (outer pair)
-- Compare left.right with right.left  (inner pair)
-- Both must match recursively.
-
-Time  Complexity: O(N)
-Space Complexity: O(H)
+A tree is symmetric if left subtree is a mirror of right subtree.
+Mirror pairs rule: left.left ↔ right.right  (outer)
+                   left.right ↔ right.left  (inner)
 */
+
+// ── Recursive ──
 function isSymmetric(root) {
     function isMirror(left, right) {
         if (!left && !right) return true;    // Both null → symmetric
@@ -497,23 +532,44 @@ function isSymmetric(root) {
     return isMirror(root.left, root.right);
 }
 
+// ── Iterative — Stack ──
+/*
+Use stack.pop() instead of queue.shift() — both correct, but
+pop() is O(1) vs shift() O(N).
+Push mirror pairs each iteration.
+*/
+function isSymmetricIterative(root) {
+    if (!root) return true;
+    const stack = [[root.left, root.right]];
+    while (stack.length > 0) {
+        const [left, right] = stack.pop();
+        if (!left && !right) continue;            // Both null → ok
+        if (!left || !right) return false;        // One null  → not ok
+        if (left.val !== right.val) return false; // Values differ
+        stack.push(
+            [left.left,  right.right],  // Outer pair
+            [left.right, right.left]    // Inner pair
+        );
+    }
+    return true;
+}
+
 
 // ============================================================
-// 12. COUNT TOTAL NODES
+// 12. SAME TREE
 // ============================================================
 /*
-Simple DFS: count = 1 + countLeft + countRight
+Two trees are the same if structurally identical AND all
+corresponding node values are equal.
 
-For a COMPLETE binary tree specifically (LC #222):
-- Use binary search + bit manipulation for O(log²N).
-- Here we show the general O(N) solution.
-
-Time  Complexity: O(N)
-Space Complexity: O(H)
+Time: O(N)  |  Space: O(H)
 */
-function countNodes(root) {
-    if (!root) return 0;
-    return 1 + countNodes(root.left) + countNodes(root.right);
+function isSameTree(p, q) {
+    if (!p && !q) return true;    // Both null → same
+    if (!p || !q) return false;   // One null  → different
+    return p.val === q.val
+        && isSameTree(p.left,  q.left)
+        && isSameTree(p.right, q.right);
 }
 
 
@@ -521,35 +577,26 @@ function countNodes(root) {
 // 13. MAXIMUM PATH SUM
 // ============================================================
 /*
-Path = sequence of nodes where each pair of adjacent nodes has
-an edge. The path does NOT need to go through the root.
+Path = any sequence of nodes connected by edges.
+Does NOT need to pass through root.
 
-Approach:
-- For every node, the best path THROUGH it is:
-    node.val + max(0, bestFromLeft) + max(0, bestFromRight)
-  (we take 0 instead of a negative subtree contribution)
-- Track global max during DFS.
-- Return to parent only the SINGLE best branch (left or right).
-  We cannot return BOTH branches — a path can't split.
+Two key rules:
+1. Math.max(0, gain) — ignore negative subtrees (clamp to 0)
+2. Return SINGLE branch to parent — path cannot split upward
 
-Time  Complexity: O(N)
-Space Complexity: O(H)
+Time: O(N)  |  Space: O(H)
 */
 function maxPathSum(root) {
-    let globalMax = -Infinity;
-
+    let maxSum = -Infinity;
     function dfs(node) {
         if (!node) return 0;
-        const leftGain  = Math.max(0, dfs(node.left));   // Ignore negatives
-        const rightGain = Math.max(0, dfs(node.right));
-        // Best complete path through this node
-        globalMax = Math.max(globalMax, node.val + leftGain + rightGain);
-        // Return best SINGLE branch to parent
-        return node.val + Math.max(leftGain, rightGain);
+        const left  = Math.max(0, dfs(node.left));   // Ignore negatives
+        const right = Math.max(0, dfs(node.right));
+        maxSum = Math.max(maxSum, node.val + left + right); // Full path through node
+        return node.val + Math.max(left, right);            // Single branch to parent
     }
-
     dfs(root);
-    return globalMax;
+    return maxSum;
 }
 
 
@@ -557,29 +604,22 @@ function maxPathSum(root) {
 // 14. LOWEST COMMON ANCESTOR (LCA)
 // ============================================================
 /*
-LCA of nodes p and q = deepest node that has both p and q as
-descendants (a node can be a descendant of itself).
+LCA(p, q) = deepest node that has both as descendants
+           (a node is a descendant of itself).
 
-Approach:
-- If root is null → return null (not found)
-- If root equals p or q → return root (found one of them)
-- Recurse on left and right subtrees.
-- If BOTH left and right return non-null → root is the LCA
-  (p and q are in different subtrees).
-- Otherwise return whichever side is non-null.
+- If root == p or q → return root (found one)
+- If both sides return non-null → root is LCA (p and q in different subtrees)
+- Only one side non-null → both are in that subtree
 
-Time  Complexity: O(N)
-Space Complexity: O(H)
+Time: O(N)  |  Space: O(H)
 */
 function lowestCommonAncestor(root, p, q) {
     if (!root) return null;
     if (root.val === p.val || root.val === q.val) return root;
-
     const leftLCA  = lowestCommonAncestor(root.left,  p, q);
     const rightLCA = lowestCommonAncestor(root.right, p, q);
-
-    if (leftLCA && rightLCA) return root;    // p in left, q in right → LCA is root
-    return leftLCA ?? rightLCA;              // Both in same subtree
+    if (leftLCA && rightLCA) return root;   // p in left, q in right → LCA is root
+    return leftLCA ?? rightLCA;             // Both in same subtree
 }
 
 
@@ -587,81 +627,51 @@ function lowestCommonAncestor(root, p, q) {
 // 15. ZIGZAG (SPIRAL) LEVEL ORDER TRAVERSAL
 // ============================================================
 /*
-Same as level order BFS, but alternate the direction:
-- Even levels → left to right
-- Odd  levels → right to left  (reverse the level array)
+Same as BFS but alternate direction each level.
 
-Time  Complexity: O(N)
-Space Complexity: O(N)
+Index trick: place at (reverse ? n-1-i : i) directly — no .reverse() needed.
+This avoids an extra O(N) reverse pass per level.
+
+Time: O(N)  |  Space: O(N)
 */
 function zigzagLevelOrder(root) {
     if (!root) return [];
-    const result = [];
-    const queue = [root];
-    let leftToRight = true;
-
+    const result = [], queue = [root];
+    let reverse = false;
     while (queue.length > 0) {
-        const levelSize = queue.length;
-        const level = [];
-        for (let i = 0; i < levelSize; i++) {
+        const n = queue.length;
+        const level = new Array(n);
+        for (let i = 0; i < n; i++) {
             const node = queue.shift();
-            level.push(node.val);
+            level[reverse ? n - 1 - i : i] = node.val; // Place at correct index directly
             if (node.left)  queue.push(node.left);
             if (node.right) queue.push(node.right);
         }
-        if (!leftToRight) level.reverse();
         result.push(level);
-        leftToRight = !leftToRight;
+        reverse = !reverse;
     }
     return result;
 }
 
 
 // ============================================================
-// 16. LEFT / RIGHT / TOP / BOTTOM VIEW
+// 16. LEFT / RIGHT VIEW
 // ============================================================
-
-// ── 16a. Left View ──
 /*
-The leftmost visible node at each level when viewed from the left.
-→ First node of each level in BFS.
+Left View  → FIRST node at each BFS level (i === 0)
+Right View → LAST  node at each BFS level (i === n - 1)
 
-Time  Complexity: O(N)
-Space Complexity: O(N)
-*/
-function leftView(root) {
-    if (!root) return [];
-    const result = [];
-    const queue = [root];
-    while (queue.length > 0) {
-        const levelSize = queue.length;
-        for (let i = 0; i < levelSize; i++) {
-            const node = queue.shift();
-            if (i === 0) result.push(node.val);  // First node of the level
-            if (node.left)  queue.push(node.left);
-            if (node.right) queue.push(node.right);
-        }
-    }
-    return result;
-}
-
-// ── 16b. Right View ──
-/*
-The rightmost visible node at each level when viewed from the right.
-→ Last node of each level in BFS.
-
-Time  Complexity: O(N)
-Space Complexity: O(N)
+Time: O(N)  |  Space: O(N)
 */
 function rightView(root) {
     if (!root) return [];
-    const result = [];
-    const queue = [root];
+    const result = [], queue = [root];
     while (queue.length > 0) {
-        const levelSize = queue.length;
-        for (let i = 0; i < levelSize; i++) {
+        const n = queue.length;
+        for (let i = 0; i < n; i++) {
             const node = queue.shift();
-            if (i === levelSize - 1) result.push(node.val);  // Last node of the level
+            if (i === n - 1) result.push(node.val); // Last = right view
+            // if (i === 0) result.push(node.val);  // First = left view
             if (node.left)  queue.push(node.left);
             if (node.right) queue.push(node.right);
         }
@@ -669,101 +679,118 @@ function rightView(root) {
     return result;
 }
 
-// ── 16c. Top View ──
+
+// ============================================================
+// 17. TOP VIEW
+// ============================================================
 /*
-Nodes visible when the tree is viewed from the TOP.
-A node is visible if it is the FIRST node encountered at a
-horizontal distance (HD) from the root.
-
-HD of root = 0; HD of left child = parent HD - 1;
-HD of right child = parent HD + 1.
-
-BFS ensures the first node seen at each HD is the topmost.
-
-Time  Complexity: O(N log N) — due to ordered Map sorting
-Space Complexity: O(N)
+HD: root=0, left child=hd-1, right child=hd+1.
+BFS top-to-bottom → FIRST node seen at each HD = top view.
 */
+
+// O(N log N) — sort keys at end
 function topView(root) {
     if (!root) return [];
-    const hdMap = new Map();   // HD → node value
-    const queue = [[root, 0]]; // [node, horizontal distance]
-
+    const map = new Map(), queue = [[root, 0]];
     while (queue.length > 0) {
-        const [node, hd] = queue.shift();
-        if (!hdMap.has(hd)) hdMap.set(hd, node.val);  // First at this HD → top view
-        if (node.left)  queue.push([node.left,  hd - 1]);
-        if (node.right) queue.push([node.right, hd + 1]);
+        const [curr, hd] = queue.shift();
+        if (!map.has(hd)) map.set(hd, curr.val);   // FIRST = top
+        if (curr.left)  queue.push([curr.left,  hd - 1]);
+        if (curr.right) queue.push([curr.right, hd + 1]);
     }
-
-    // Sort by horizontal distance to get left-to-right order
-    return [...hdMap.entries()]
-        .sort((a, b) => a[0] - b[0])
-        .map(([, val]) => val);
+    return [...map.keys()].sort((a, b) => a - b).map(hd => map.get(hd));
 }
 
-// ── 16d. Bottom View ──
-/*
-Nodes visible when the tree is viewed from the BOTTOM.
-A node is visible if it is the LAST node seen at a given HD.
-BFS naturally overwrites earlier entries → bottom view.
+// O(N) — track min/max HD during BFS → linear scan at end, no sort needed
+function topViewOptimal(root) {
+    if (!root) return [];
+    const map = new Map(), queue = [[root, 0]];
+    let minHd = 0, maxHd = 0;
+    while (queue.length > 0) {
+        const [curr, hd] = queue.shift();
+        if (!map.has(hd)) map.set(hd, curr.val);
+        minHd = Math.min(minHd, hd);
+        maxHd = Math.max(maxHd, hd);
+        if (curr.left)  queue.push([curr.left,  hd - 1]);
+        if (curr.right) queue.push([curr.right, hd + 1]);
+    }
+    const result = [];
+    for (let hd = minHd; hd <= maxHd; hd++) result.push(map.get(hd));
+    return result;
+}
 
-Time  Complexity: O(N log N)
-Space Complexity: O(N)
+
+// ============================================================
+// 18. BOTTOM VIEW
+// ============================================================
+/*
+LAST node seen at each HD = bottom view (always overwrite map).
+
+  Top View    → if (!map.has(hd)) map.set(hd, val)  ← store FIRST
+  Bottom View → map.set(hd, val)                     ← store LAST
 */
+
+// O(N log N)
 function bottomView(root) {
     if (!root) return [];
-    const hdMap = new Map();
-    const queue = [[root, 0]];
-
+    const map = new Map(), queue = [[root, 0]];
     while (queue.length > 0) {
-        const [node, hd] = queue.shift();
-        hdMap.set(hd, node.val);   // Always overwrite → last = bottom
-        if (node.left)  queue.push([node.left,  hd - 1]);
-        if (node.right) queue.push([node.right, hd + 1]);
+        const [curr, hd] = queue.shift();
+        map.set(hd, curr.val);  // Always overwrite → bottommost wins
+        if (curr.left)  queue.push([curr.left,  hd - 1]);
+        if (curr.right) queue.push([curr.right, hd + 1]);
     }
+    return [...map.keys()].sort((a, b) => a - b).map(hd => map.get(hd));
+}
 
-    return [...hdMap.entries()]
-        .sort((a, b) => a[0] - b[0])
-        .map(([, val]) => val);
+// O(N) — min/max HD tracking
+function bottomViewOptimal(root) {
+    if (!root) return [];
+    const map = new Map(), queue = [[root, 0]];
+    let minHd = 0, maxHd = 0;
+    while (queue.length > 0) {
+        const [curr, hd] = queue.shift();
+        map.set(hd, curr.val);
+        minHd = Math.min(minHd, hd);
+        maxHd = Math.max(maxHd, hd);
+        if (curr.left)  queue.push([curr.left,  hd - 1]);
+        if (curr.right) queue.push([curr.right, hd + 1]);
+    }
+    const result = [];
+    for (let hd = minHd; hd <= maxHd; hd++) result.push(map.get(hd));
+    return result;
 }
 
 
 // ============================================================
-// 17. BOUNDARY TRAVERSAL
+// 19. BOUNDARY TRAVERSAL
 // ============================================================
 /*
-Print all boundary nodes in ANTI-CLOCKWISE order:
+Anti-clockwise:
   1. Left boundary  (top-down, excluding leaves)
-  2. All leaf nodes  (left-to-right)
+  2. All leaf nodes  (left-to-right DFS)
   3. Right boundary  (bottom-up, excluding leaves)
 
-Approach:
-- Add root (if not a leaf).
-- Traverse left boundary: go left; if no left, go right. Stop before leaf.
-- Collect leaves using DFS.
-- Traverse right boundary: go right; if no right, go left. Stop before leaf.
-  Collect in a temporary array and reverse it (we want bottom-up).
+- Left boundary:  go left, fallback right, stop before leaf
+- Right boundary: go right, fallback left, stop before leaf → reverse
 
-Time  Complexity: O(N)
-Space Complexity: O(N)
+Time: O(N)  |  Space: O(H)
 */
 function boundaryTraversal(root) {
     if (!root) return [];
     const result = [];
+    const isLeaf = node => !node.left && !node.right;
 
-    const isLeaf = (node) => !node.left && !node.right;
+    if (!isLeaf(root)) result.push(root.val);   // 1. Root (if not a leaf)
 
-    // 1. Root (if not a leaf)
-    if (!isLeaf(root)) result.push(root.val);
-
-    // 2. Left boundary (top-down, excluding leaf)
+    // 2. Left boundary (top-down, excluding leaves)
     let node = root.left;
     while (node) {
         if (!isLeaf(node)) result.push(node.val);
         node = node.left ? node.left : node.right;
     }
 
-    // 3. All leaves (DFS)
+    // 3. All leaves via DFS
     function addLeaves(n) {
         if (!n) return;
         if (isLeaf(n)) { result.push(n.val); return; }
@@ -772,56 +799,49 @@ function boundaryTraversal(root) {
     }
     addLeaves(root);
 
-    // 4. Right boundary (bottom-up, excluding leaf)
+    // 4. Right boundary (bottom-up, excluding leaves)
     const rightBoundary = [];
     node = root.right;
     while (node) {
         if (!isLeaf(node)) rightBoundary.push(node.val);
         node = node.right ? node.right : node.left;
     }
-    result.push(...rightBoundary.reverse());  // Reverse for bottom-up
-
+    result.push(...rightBoundary.reverse());    // Reverse for bottom-up
     return result;
 }
 
 
 // ============================================================
-// 18. VERTICAL ORDER TRAVERSAL
+// 20. VERTICAL ORDER TRAVERSAL
 // ============================================================
 /*
-Group nodes by their (column, row) coordinates where:
-  - Root is at (col=0, row=0)
-  - Left child:  col - 1, row + 1
-  - Right child: col + 1, row + 1
+Root = (col=0, row=0). Left child=(col-1, row+1). Right child=(col+1, row+1).
+Same (col, row) → sort by VALUE.
 
-Within the same (col, row) sort by VALUE.
-Result: columns sorted left-to-right.
+We track row (level) because nodes at same (col, row) must be sorted by value.
+Without row tracking we'd lose that grouping info.
 
-Approach:
-- BFS, storing [node, col, row] in queue.
-- Use a Map: col → sorted list of (row, val) pairs.
-- After BFS, sort columns and within each column sort by row then val.
-
-Time  Complexity: O(N log N)
-Space Complexity: O(N)
+Time: O(N log N)  |  Space: O(N)
 */
 function verticalOrderTraversal(root) {
     if (!root) return [];
-    const colMap = new Map();  // col → [ [row, val], ... ]
-    const queue = [[root, 0, 0]];
-
+    const map = new Map();          // col → [[row, val], ...]
+    const queue = [[root, 0]];
+    let level = 0;
     while (queue.length > 0) {
-        const [node, col, row] = queue.shift();
-        if (!colMap.has(col)) colMap.set(col, []);
-        colMap.get(col).push([row, node.val]);
-        if (node.left)  queue.push([node.left,  col - 1, row + 1]);
-        if (node.right) queue.push([node.right, col + 1, row + 1]);
+        const n = queue.length;
+        for (let i = 0; i < n; i++) {
+            const [curr, col] = queue.shift();
+            (map.get(col) ?? map.set(col, []).get(col)).push([level, curr.val]);
+            if (curr.left)  queue.push([curr.left,  col - 1]);
+            if (curr.right) queue.push([curr.right, col + 1]);
+        }
+        level++;
     }
-
-    return [...colMap.entries()]
-        .sort((a, b) => a[0] - b[0])                       // Sort by column
-        .map(([, entries]) =>
-            entries
+    return [...map.keys()]
+        .sort((a, b) => a - b)
+        .map(col =>
+            map.get(col)
                 .sort((a, b) => a[0] - b[0] || a[1] - b[1])  // Sort by row, then val
                 .map(([, val]) => val)
         );
@@ -829,67 +849,60 @@ function verticalOrderTraversal(root) {
 
 
 // ============================================================
-// 19. MORRIS INORDER TRAVERSAL (O(1) Space)
+// 21. MORRIS INORDER TRAVERSAL (O(1) Space)
 // ============================================================
 /*
-Standard iterative/recursive traversal uses O(H) stack space.
-Morris traversal achieves O(1) extra space by temporarily
-modifying tree links (threading).
+Achieves O(1) extra space by THREADING tree links temporarily.
+No stack, no recursion.
 
 Key Idea — Threaded Binary Tree:
-- For each node, find the INORDER PREDECESSOR (rightmost node
-  in left subtree).
-- If predecessor's right is null → create a thread: point it
-  to current node. Move current to current.left.
-- If predecessor's right points back to current → thread already
-  exists (second visit). Remove thread. Record current. Move right.
+  Find INORDER PREDECESSOR (rightmost in left subtree).
+  predecessor.right == null  → create thread → move left  (1st visit)
+  predecessor.right == curr  → remove thread → visit curr → move right (2nd visit)
 
-Approach (Step by Step):
-1. Start: curr = root.
-2. While curr is not null:
-   a. If curr has NO left child:
-      → Visit curr (record value).
-      → Move curr = curr.right.
-   b. If curr HAS a left child:
-      → Find inorder predecessor (rightmost of left subtree).
-      → If predecessor.right == null:
-         • Create thread: predecessor.right = curr.
-         • Move curr = curr.left.
-      → If predecessor.right == curr:
-         • Remove thread: predecessor.right = null.
-         • Visit curr (record value).
-         • Move curr = curr.right.
-
-Time  Complexity: O(N) — each node visited at most twice
-Space Complexity: O(1) — no stack or recursion used
-
-Note: The tree is temporarily modified but restored to its
-      original structure after traversal.
+Time: O(N) — each node visited at most twice
+Space: O(1) — tree is modified temporarily but fully restored
 */
 function morrisInorder(root) {
     const result = [];
     let curr = root;
-
     while (curr) {
         if (curr.left) {
-            // Find inorder predecessor (rightmost in left subtree)
-            let predecessor = curr.left;
-            while (predecessor.right && predecessor.right !== curr) {
-                predecessor = predecessor.right;
-            }
-
-            if (predecessor.right === curr) {
-                // Second visit: remove thread, visit curr
-                predecessor.right = null;
+            let pred = curr.left;
+            while (pred.right && pred.right !== curr) pred = pred.right;
+            if (pred.right === curr) {      // 2nd visit: remove thread, visit
+                pred.right = null;
                 result.push(curr.val);
                 curr = curr.right;
-            } else {
-                // First visit: create thread back to curr
-                predecessor.right = curr;
+            } else {                        // 1st visit: create thread
+                pred.right = curr;
                 curr = curr.left;
             }
         } else {
-            // No left child — visit and move right
+            result.push(curr.val);          // No left child → visit, move right
+            curr = curr.right;
+        }
+    }
+    return result;
+}
+
+// Morris Preorder — record on FIRST visit (before going left)
+function morrisPreorder(root) {
+    const result = [];
+    let curr = root;
+    while (curr) {
+        if (curr.left) {
+            let pred = curr.left;
+            while (pred.right && pred.right !== curr) pred = pred.right;
+            if (pred.right === curr) {
+                pred.right = null;
+                curr = curr.right;
+            } else {
+                result.push(curr.val);  // Record on FIRST visit
+                pred.right = curr;
+                curr = curr.left;
+            }
+        } else {
             result.push(curr.val);
             curr = curr.right;
         }
@@ -897,63 +910,24 @@ function morrisInorder(root) {
     return result;
 }
 
-// Morris Preorder — same logic, but record BEFORE going left
-function morrisPreorder(root) {
-    const result = [];
-    let curr = root;
-
-    while (curr) {
-        if (curr.left) {
-            let predecessor = curr.left;
-            while (predecessor.right && predecessor.right !== curr) {
-                predecessor = predecessor.right;
-            }
-            if (predecessor.right === curr) {
-                predecessor.right = null;
-                curr = curr.right;
-            } else {
-                result.push(curr.val);  // Visit here (first time) for preorder
-                predecessor.right = curr;
-                curr = curr.left;
-            }
-        } else {
-            result.push(curr.val);  // Visit here for preorder
-            curr = curr.right;
-        }
-    }
-    return result;
-}
-
 
 // ============================================================
-// 20. SERIALIZE & DESERIALIZE BINARY TREE
+// 22. SERIALIZE & DESERIALIZE BINARY TREE
 // ============================================================
 /*
-Serialize  → Convert a tree to a string representation.
-Deserialize → Rebuild the tree from that string.
+Serialize  → tree → string (BFS, "null" for missing nodes)
+Deserialize → string → tree
 
-Approach (Level Order / BFS):
-- Serialize: BFS and write each node's value; write "null" for
-  missing children. Join with commas.
-- Deserialize: Split string. Create root from first token.
-  Use a queue: for each node, take next two tokens as its
-  left and right children.
-
-Time  Complexity: O(N)
-Space Complexity: O(N)
+Time: O(N)  |  Space: O(N)
 */
 function serialize(root) {
     if (!root) return "null";
-    const result = [];
-    const queue = [root];
+    const result = [], queue = [root];
     while (queue.length > 0) {
         const node = queue.shift();
-        if (node === null) {
-            result.push("null");
-        } else {
-            result.push(String(node.val));
-            queue.push(node.left, node.right);   // Push even if null
-        }
+        if (!node) { result.push("null"); continue; }
+        result.push(String(node.val));
+        queue.push(node.left, node.right);   // Push even if null
     }
     return result.join(",");
 }
@@ -982,34 +956,53 @@ function deserialize(data) {
 
 
 // ============================================================
-// 21. COMPLEXITY SUMMARY
+// 23. COMPLEXITY SUMMARY
 // ============================================================
 /*
-╔══════════════════════════════════════╦════════╦═══════════╗
-║ Operation                            ║  Time  ║   Space   ║
-╠══════════════════════════════════════╬════════╬═══════════╣
-║ Preorder / Inorder / Postorder (rec) ║  O(N)  ║   O(H)    ║
-║ Iterative Traversals                 ║  O(N)  ║   O(N)    ║
-║ Level Order (BFS)                    ║  O(N)  ║   O(N)    ║
-║ All-in-One Traversal                 ║  O(N)  ║   O(N)    ║
-║ Height of Tree                       ║  O(N)  ║   O(H)    ║
-║ Diameter of Tree                     ║  O(N)  ║   O(H)    ║
-║ Check Balanced                       ║  O(N)  ║   O(H)    ║
-║ Check Symmetric                      ║  O(N)  ║   O(H)    ║
-║ Count Nodes                          ║  O(N)  ║   O(H)    ║
-║ Maximum Path Sum                     ║  O(N)  ║   O(H)    ║
-║ Lowest Common Ancestor               ║  O(N)  ║   O(H)    ║
-║ Zigzag Level Order                   ║  O(N)  ║   O(N)    ║
-║ Left / Right View                    ║  O(N)  ║   O(N)    ║
-║ Top / Bottom View                    ║ O(NlogN)║  O(N)    ║
-║ Boundary Traversal                   ║  O(N)  ║   O(N)    ║
-║ Vertical Order Traversal             ║ O(NlogN)║  O(N)    ║
-║ Morris Inorder / Preorder            ║  O(N)  ║   O(1)    ║
-║ Serialize / Deserialize              ║  O(N)  ║   O(N)    ║
-╚══════════════════════════════════════╩════════╩═══════════╝
+╔════════════════════════════════════════╦══════════╦═══════════╗
+║ Operation                              ║   Time   ║   Space   ║
+╠════════════════════════════════════════╬══════════╬═══════════╣
+║ Recursive Traversals (Pre/In/Post)     ║  O(N)    ║   O(H)    ║
+║ Iterative Preorder                     ║  O(N)    ║   O(N)    ║
+║ Iterative Inorder                      ║  O(N)    ║   O(N)    ║
+║ Iterative Postorder — Two Stack        ║  O(N)    ║   O(N)    ║
+║ Iterative Postorder — One Stack + prev ║  O(N)    ║   O(H)    ║
+║ Level Order (BFS)                      ║  O(N)    ║   O(N)    ║
+║ All-in-One Traversal (state machine)   ║  O(N)    ║   O(N)    ║
+║ Height / MaxDepth                      ║  O(N)    ║   O(H)    ║
+║ MaxDepth — DFS with depth param        ║  O(N)    ║   O(H)    ║
+║ Diameter — Brute Force                 ║  O(N²)   ║   O(H)    ║
+║ Diameter — Optimal (combined DFS)      ║  O(N)    ║   O(H)    ║
+║ Balanced — Brute Force                 ║  O(N²)   ║   O(H)    ║
+║ Balanced — Optimal (-1 sentinel)       ║  O(N)    ║   O(H)    ║
+║ Symmetric — Recursive                  ║  O(N)    ║   O(H)    ║
+║ Symmetric — Iterative Stack            ║  O(N)    ║   O(H)    ║
+║ Same Tree                              ║  O(N)    ║   O(H)    ║
+║ Maximum Path Sum                       ║  O(N)    ║   O(H)    ║
+║ Lowest Common Ancestor                 ║  O(N)    ║   O(H)    ║
+║ Zigzag Level Order (index trick)       ║  O(N)    ║   O(N)    ║
+║ Left / Right View                      ║  O(N)    ║   O(N)    ║
+║ Top / Bottom View — sort keys          ║ O(NlogN) ║   O(N)    ║
+║ Top / Bottom View — minHd/maxHd O(N)   ║  O(N)    ║   O(N)    ║
+║ Boundary Traversal                     ║  O(N)    ║   O(H)    ║
+║ Vertical Order Traversal               ║ O(NlogN) ║   O(N)    ║
+║ Morris Inorder / Preorder              ║  O(N)    ║   O(1)    ║
+║ Serialize / Deserialize                ║  O(N)    ║   O(N)    ║
+╚════════════════════════════════════════╩══════════╩═══════════╝
 
 H = height of tree
   → Balanced tree: H = O(log N)
   → Skewed tree:   H = O(N)
-*/
 
+KEY PATTERNS:
+  DFS + closure variable    → Diameter, MaxPathSum (track global, return local)
+  -1 sentinel               → Balanced check (signal imbalance + short-circuit)
+  BFS level snapshot        → levelOrder, Zigzag, Views (const n = queue.length)
+  HD (horizontal distance)  → Top/Bottom/Vertical Order (col tracking via BFS)
+  prev pointer              → One-stack Postorder (avoid re-processing right child)
+  Mirror pair comparison    → Symmetric (left.left↔right.right, left.right↔right.left)
+  Thread + restore          → Morris (O(1) space via predecessor.right threading)
+  Two non-null sides = LCA  → lowestCommonAncestor
+  Index placement trick     → Zigzag (avoid .reverse() with n-1-i index)
+  minHd/maxHd tracking      → Top/Bottom View O(N) (avoid sort)
+*/
