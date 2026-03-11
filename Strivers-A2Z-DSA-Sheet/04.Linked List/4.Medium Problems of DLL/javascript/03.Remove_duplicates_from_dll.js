@@ -12,14 +12,10 @@ Example 2:
   Output: 1 <-> 2 <-> 3 <-> 4
 
 APPROACH:
-- Track current unique value in `dupVal` (start with head.data).
-- Walk curr from head.next:
-    - Inner while: while curr exists AND curr.data === dupVal
-        → unlink curr: fix prev.next and next.prev, advance curr.
-    - After inner while: curr is either null or a new unique value.
-        → update dupVal = curr.data, advance curr = curr.next.
-
-Since the list is SORTED, all duplicates are contiguous → single pass.
+- Walk curr from head, one node at a time.
+- For each node, find the next node with a different value (nextDistinct).
+- Skip all duplicates by linking curr directly to nextDistinct.
+- Since the list is SORTED, all duplicates are contiguous → single pass.
 
 TIME COMPLEXITY:  O(N)
 SPACE COMPLEXITY: O(1)
@@ -34,25 +30,21 @@ class Node {
 }
 
 function removeDuplicates(head) {
-    if (!head) return null;
-
-    let dupVal = head.data;
-    let curr   = head.next;
+    let curr = head;
 
     while (curr) {
-        // Remove all nodes with value === dupVal
-        while (curr && curr.data === dupVal) {
-            // Unlink curr from DLL
-            curr.prev.next = curr.next;
-            if (curr.next) curr.next.prev = curr.prev;
-            curr = curr.next;
+        let nextDistinct = curr.next;
+
+        // Skip all nodes with the same value as curr
+        while (nextDistinct && nextDistinct.data === curr.data) {
+            nextDistinct = nextDistinct.next;
         }
 
-        // curr is now at a new unique value (or null)
-        if (curr) {
-            dupVal = curr.data;
-            curr   = curr.next;
-        }
+        // Link curr directly to the next distinct node
+        curr.next = nextDistinct;
+        if (nextDistinct) nextDistinct.prev = curr;
+
+        curr = curr.next;
     }
 
     return head;
@@ -86,4 +78,3 @@ printDLL(removeDuplicates(head)); // 1 <-> 2 <-> 3 <-> 4
 
 head = buildDLL([1, 1, 2, 2, 3]);
 printDLL(removeDuplicates(head)); // 1 <-> 2 <-> 3
-
