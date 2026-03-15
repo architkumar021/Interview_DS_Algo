@@ -1,36 +1,11 @@
-/**QUESTION:**
+// Question:
+// Given a BST and a number X, find the Ceil of X.
+// Ceil(X) = smallest value in BST that is >= X. Return -1 if not found.
 
-Given a Binary Search Tree (BST) and a number `X`, find the Ceil of `X`. Ceil(X) is a number that is either equal to `X` or is immediately greater than `X` in the BST.
-
-If the Ceil of `X` could not be found, return `-1`.
-
-**Example 1:**
-
-Input:
-
-      5
-    /   \
-   1     7
-    \
-     2 
-      \
-       3
-X = 3
-
-Output: 3
-
-Explanation: We find 3 in the BST, so the ceil of 3 is 3.
-
-**APPROACH:**
-
-To find the Ceil of a given number `X`, we can perform a traversal of the BST and keep track of the node with the smallest value that is greater than or equal to `X`. 
-
-**COMPLEXITY ANALYSIS:**
-
-The time complexity of this approach is O(h), where `h` is the height of the BST.
-The space complexity is O(1) since we are using a constant amount of extra space.
-
-**CODE:**/
+// Approach:
+// Traverse the BST. If current node >= X, it's a possible ceil — go left to find smaller.
+// If current node < X, go right. Stop when null.
+// - Time: O(H), Space: O(1)
 
 class Node {
     constructor(data, left = null, right = null) {
@@ -40,67 +15,26 @@ class Node {
     }
 }
 
-function solve(root, x, ansRef) {
-    if (!root) return;
-    if (root.data === x) {
-        ansRef.val = root.data;
-        return;
-    } 
-    if (root.data > x) {
-        ansRef.val = root.data;
-        return solve(root.left, x, ansRef);
+// Iterative (Optimal)
+function findCeil(root, x) {
+    let ceil = -1;
+    while (root) {
+        if (root.data === x) return x;
+        if (root.data > x) {
+            ceil = root.data;
+            root = root.left;
+        } else {
+            root = root.right;
+        }
     }
-    return solve(root.right, x, ansRef);
+    return ceil;
 }
 
-function findCeil(root, input) {
-    if (root === null) return -1;
-    const ansRef = { val: -1 };
-    solve(root, input, ansRef);
-    return ansRef.val;
+// Recursive Alternative
+function findCeilRecursive(root, x) {
+    if (!root) return -1;
+    if (root.data === x) return x;
+    if (root.data < x) return findCeilRecursive(root.right, x);
+    const leftCeil = findCeilRecursive(root.left, x);
+    return leftCeil >= x ? leftCeil : root.data;
 }
-
-
-// class Node {
-//     constructor(data, left = null, right = null) {
-//         this.data = data;
-//         this.left = left;
-//         this.right = right;
-//     }
-// }
-
-// function findCeil(root, x) {
-//     let ceil = -1;
-//     let current = root;
-
-//     while (current) {
-//         if (current.data === x) {
-//             return x; // exact match = ceil
-//         }
-
-//         if (current.data > x) {
-//             ceil = current.data;   // possible ceil
-//             current = current.left;
-//         } else {
-//             current = current.right;
-//         }
-//     }
-
-//     return ceil;
-// }
-
-
-// Recursive Way
-
-// function findCeil(root, x) {
-//     if (!root) return -1;
-
-//     if (root.data === x) return x;
-
-//     if (root.data < x) {
-//         return findCeil(root.right, x);
-//     }
-
-//     const leftCeil = findCeil(root.left, x);
-//     return leftCeil >= x ? leftCeil : root.data;
-// }
