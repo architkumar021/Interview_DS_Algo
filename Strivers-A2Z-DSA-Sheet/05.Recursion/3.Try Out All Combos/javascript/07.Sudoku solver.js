@@ -3,103 +3,58 @@
   QUESTION: 37. Sudoku Solver (LeetCode)
 =============================================================================
 
-  Solve a Sudoku puzzle by filling empty cells ('.').
-  Rules:
-  - Each ROW must contain digits 1-9 exactly once
-  - Each COLUMN must contain digits 1-9 exactly once
-  - Each 3×3 SUB-BOX must contain digits 1-9 exactly once
+  Fill empty cells ('.') so each row, column, and 3×3 box has digits 1-9
+  exactly once.
 
 =============================================================================
-  APPROACH: Backtracking — Try Digits 1-9 for Each Empty Cell
+  APPROACH: Backtracking — Try 1-9 Per Cell — O(9^empty) Time, O(1) Space
 =============================================================================
 
-  1. Scan board left-to-right, top-to-bottom
-  2. Find first empty cell ('.')
-  3. Try each digit '1' to '9':
-     a. Check if digit is VALID (not in same row, col, or 3×3 box)
-     b. If valid → place digit, recurse to solve rest of board
-     c. If recursion succeeds → return true (puzzle solved!)
-     d. If fails → backtrack (reset to '.'), try next digit
-  4. If no digit works → return false (triggers backtracking in parent)
-  5. If no empty cell found → board is complete → return true
+  Scan board for first '.'. Try digits 1-9:
+  - If valid (not in same row, col, or 3×3 box) → place, recurse.
+  - If recursion solves it → true. Else backtrack (reset to '.').
+  - No digit works → return false (triggers parent backtrack).
+  - No '.' found → board complete → true.
 
-  isValid(row, col, digit):
-  ─────────────────────────
-  Check 3 things in a single loop (i from 0 to 8):
-  - board[row][i] == digit → same ROW has this digit
-  - board[i][col] == digit → same COLUMN has this digit
-  - board[3*(row/3) + i/3][3*(col/3) + i%3] == digit → same 3×3 BOX
-
-  The 3×3 box formula:
-    3*(row/3) gives the starting row of the box (0, 3, or 6)
-    3*(col/3) gives the starting col of the box (0, 3, or 6)
-    i/3 and i%3 iterate through the 3×3 cells within the box
-
-  DRY RUN (simplified — first few cells):
-  ──────────────────────────────────────────
-  Board starts with some filled cells. First empty cell found at (0,2).
-  
-  solve(board):
-    Find (0,2) = '.'
-    Try '1': isValid(0,2,'1')? Check row 0, col 2, box (0,0)→(2,2)
-      If valid → place '1', solve remaining...
-      If recursion returns true → done!
-      If false → board[0][2] = '.', try '2'
-    Try '2': ...
-    ...until board is solved or all digits fail → backtrack
-
-  KEY INSIGHT: When no digit works for a cell, we return false.
-  This triggers the parent call to try the next digit for the
-  PREVIOUS empty cell. This chain of backtracking explores all
-  possibilities systematically.
-
-  Time Complexity:  O(9^(empty cells)) — worst case try 9 digits per cell
-  Space Complexity: O(81) ≈ O(1) — recursion depth ≤ 81 cells
+  isValid check (single loop i=0..8):
+  - board[row][i] → same row       | board[i][col] → same column
+  - board[boxRow + i/3][boxCol + i%3] → same 3×3 box
+    where boxRow = 3*floor(row/3), boxCol = 3*floor(col/3)
 
 =============================================================================
 */
 
-function isValid(row, col, digit, board) {
-    for (let i = 0; i < 9; i++) {
-        // Check same row
-        if (board[row][i] === digit) return false;
-
-        // Check same column
-        if (board[i][col] === digit) return false;
-
-        // Check same 3×3 box
-        let boxRow = 3 * Math.floor(row / 3) + Math.floor(i / 3);
-        let boxCol = 3 * Math.floor(col / 3) + (i % 3);
-        if (board[boxRow][boxCol] === digit) return false;
+function solveSudoku(board) {
+    function isValid(row, col, digit) {
+        let br = 3 * Math.floor(row / 3), bc = 3 * Math.floor(col / 3);
+        for (let i = 0; i < 9; i++) {
+            if (board[row][i] === digit) return false;  // Row
+            if (board[i][col] === digit) return false;  // Column
+            if (board[br + Math.floor(i / 3)][bc + (i % 3)] === digit) return false;  // Box
+        }
+        return true;
     }
-    return true;
-}
 
-function solve(board) {
-    // Scan every cell
-    for (let i = 0; i < 9; i++) {
-        for (let j = 0; j < 9; j++) {
-            if (board[i][j] === '.') {
-                // Try digits 1-9
-                for (let d = 1; d <= 9; d++) {
-                    let digit = String(d);
-                    if (isValid(i, j, digit, board)) {
-                        board[i][j] = digit;           // Place digit
-                        if (solve(board)) return true;  // Recurse
-                        board[i][j] = '.';             // Backtrack
+    function solve() {
+        for (let i = 0; i < 9; i++) {
+            for (let j = 0; j < 9; j++) {
+                if (board[i][j] === '.') {
+                    for (let d = 1; d <= 9; d++) {
+                        let ch = String(d);
+                        if (isValid(i, j, ch)) {
+                            board[i][j] = ch;
+                            if (solve()) return true;
+                            board[i][j] = '.';  // Backtrack
+                        }
                     }
+                    return false;  // No digit works → backtrack
                 }
-                // No digit works → trigger backtracking
-                return false;
             }
         }
+        return true;  // All cells filled
     }
-    // All cells filled → puzzle solved!
-    return true;
-}
 
-function solveSudoku(board) {
-    solve(board);
+    solve();
 }
 
 // ==========================================================================

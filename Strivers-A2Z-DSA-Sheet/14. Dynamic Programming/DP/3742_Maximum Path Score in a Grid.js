@@ -1,94 +1,70 @@
-// 3742. Maximum Path Score in a Grid
+/*
+=============================================================================
+  QUESTION: 3742. Maximum Path Score in a Grid (LeetCode)
+=============================================================================
 
-// You are given an m x n grid where each cell contains one of the values 0, 1, or 2. You are also given an integer k.
+  m×n grid, cells contain 0, 1, or 2. Move only right or down.
+  Score/cost per cell value:
+    0 → score 0, cost 0
+    1 → score 1, cost 1
+    2 → score 2, cost 1
 
-// You start from the top-left corner (0, 0) and want to reach the bottom-right corner (m - 1, n - 1) by moving only right or down.
+  Return max score without exceeding total cost k. Return -1 if impossible.
 
-// Each cell contributes a specific score and incurs an associated cost, according to their cell values:
+  Example: grid=[[0,1],[2,0]], k=1 → 2
+    Path: (0,0)→(1,0)→(1,1) = 0+2+0 = score 2, cost 1 ≤ k ✓
 
-// 0: adds 0 to your score and costs 0.
-// 1: adds 1 to your score and costs 1.
-// 2: adds 2 to your score and costs 1. ​​​​​​​
-// Return the maximum score achievable without exceeding a total cost of k, or -1 if no valid path exists.
+=============================================================================
+  PATTERN: Grid DP with 3D State (row, col, remaining cost)
+=============================================================================
 
-// Note: If you reach the last cell but the total cost exceeds k, the path is invalid.
+  solve(i, j, cost) = max score from (i,j) to (m-1,n-1) with cost spent so far.
 
- 
+  At each cell, compute score/cost, then try right and down.
+  If cost exceeds budget → invalid path (-1).
 
-// Example 1:
+=============================================================================
+  APPROACH: Memoization — O(M×N×K) Time, O(M×N×K) Space
+=============================================================================
+*/
 
-// Input: grid = [[0, 1],[2, 0]], k = 1
+function maxPathScore(grid, k) {
+    let m = grid.length, n = grid[0].length;
+    let dp = new Map();
 
-// Output: 2
+    function solve(i, j, cost) {
+        if (i >= m || j >= n) return -1;
 
-// Explanation:​​​​​​​
+        // Compute this cell's score & cost
+        let cell = grid[i][j];
+        let addScore = cell;           // 0→0, 1→1, 2→2
+        let addCost = cell > 0 ? 1 : 0; // 0→0, 1→1, 2→1
 
-// The optimal path is:
+        let newCost = cost + addCost;
+        if (newCost > k) return -1;  // exceeded budget
 
-// Cell	grid[i][j]	Score	Total
-// Score	Cost	Total
-// Cost
-// (0, 0)	0	0	0	0	0
-// (1, 0)	2	2	2	1	1
-// (1, 1)	0	0	2	0	1
-// Thus, the maximum possible score is 2.
+        // Reached destination
+        if (i === m - 1 && j === n - 1) return addScore;
 
-// Example 2:
+        let key = `${i},${j},${newCost}`;
+        if (dp.has(key)) return dp.get(key);
 
-// Input: grid = [[0, 1],[1, 2]], k = 1
+        // Try right and down
+        let right = solve(i, j + 1, newCost);
+        let down = solve(i + 1, j, newCost);
+        let best = Math.max(right, down);
 
-// Output: -1
-
-// Explanation:
-
-// There is no path that reaches cell (1, 1)​​​​​​​ without exceeding cost k. Thus, the answer is -1.
-
- 
-
-// Constraints:
-
-// 1 <= m, n <= 200
-// 0 <= k <= 103​​​​​​​
-// ​​​​​​​grid[0][0] == 0
-// 0 <= grid[i][j] <= 2
-
-/**
- * @param {number[][]} grid
- * @param {number} k
- * @return {number}
- */
-var maxPathScore = function(grid, k) {
-    let m = grid.length;
-    let n = grid[0].length;
-
-    function solve(i, j, cost, score) {
-        if (i >= m || j >= n || cost > k) return 0;
-
-        // Compute this cell’s score & cost
-        const cell = grid[i][j];
-        const addScore = cell === 1 ? 1 : cell === 2 ? 2 : 0;
-        const addCost = cell === 0 ? 0 : 1;
-
-        const newCost = cost + addCost;
-        const newScore = score + addScore;
-
-        // Exceeded allowed cost
-        if (newCost > k) return -1;
-
-        // Reached bottom-right cell
-        if (i === m - 1 && j === n - 1) {
-            return newScore; // valid path (within cost)
-        }
-
-        // Explore both directions: right and down
-        const right = solve(i, j + 1, newCost, newScore);
-        const down = solve(i + 1, j, newCost, newScore);
-
-        // Return max valid score
-        return Math.max(right, down);
+        // If no valid path exists from here
+        let result = best === -1 ? -1 : addScore + best;
+        dp.set(key, result);
+        return result;
     }
-    const ans = solve(0, 0, 0, 0);
-    return ans === -1 ? -1 : ans;
-};
 
-console.log(maxPathScore([[0, 1],[2, 0]], 1));
+    return solve(0, 0, 0);
+}
+
+// ==========================================================================
+// DRIVER CODE
+// ==========================================================================
+console.log(maxPathScore([[0, 1], [2, 0]], 1));   // 2
+console.log(maxPathScore([[0, 1], [1, 2]], 1));   // -1

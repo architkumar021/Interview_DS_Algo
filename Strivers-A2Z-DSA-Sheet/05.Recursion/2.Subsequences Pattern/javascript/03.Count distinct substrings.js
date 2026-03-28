@@ -3,60 +3,47 @@
   QUESTION: Count Distinct Subsequences (GFG)
 =============================================================================
 
-  Given a string of lowercase alphabets, find the number of distinct subsequences.
+  Given string of lowercase alphabets, find number of distinct subsequences.
   Answer modulo 10^9 + 7.
 
-  Example: "gfg" → 7 ("", "g", "f", "gf", "fg", "gg", "gfg")
-  Example: "abc" → 8 (all 2^3 = 8 are distinct since no duplicates)
+  Examples:
+    "gfg" → 7  ("", "g", "f", "gf", "fg", "gg", "gfg")
+    "abc" → 8  (all 2^3 = 8 distinct, no duplicates)
+    "aa"  → 3  ("", "a", "aa")
 
 =============================================================================
-  APPROACH: Pick / Not-Pick + Set for Uniqueness
+  APPROACH: Pick / Not-Pick + Set — O(2^N) Time, O(2^N) Space
 =============================================================================
 
-  Same pick/not-pick pattern as Power Set, but:
-  - We work with characters (not numbers)
-  - We use a SET to automatically handle duplicates
-  - At base case, insert the current subsequence string into the set
+  Same pick/not-pick as Power Set, but use a Set to eliminate duplicates.
 
-  Why Set?
-  In "gfg", picking index 0 ('g') and skipping index 2 ('g') gives same
-  result as skipping index 0 and picking index 2. Set eliminates this.
+  Why duplicates?  In "gfg": pick idx0('g') skip idx2('g') = "g"
+                             skip idx0('g') pick idx2('g') = "g"  ← same!
+  Set automatically handles this.
 
-  DRY RUN with "gf":
-  ────────────────────
-  solve("gf", 0, "")
-    INCLUDE 'g': solve("gf", 1, "g")
-      INCLUDE 'f': solve("gf", 2, "gf") → set.add("gf")
-      EXCLUDE 'f': solve("gf", 2, "g")  → set.add("g")
-    EXCLUDE 'g': solve("gf", 1, "")
-      INCLUDE 'f': solve("gf", 2, "f")  → set.add("f")
-      EXCLUDE 'f': solve("gf", 2, "")   → set.add("")
-
-  set = {"gf", "g", "f", ""} → size = 4 ✓
-
-  Time Complexity:  O(2^N) — enumerate all subsequences
-  Space Complexity: O(2^N) — storing in set
+  Dry Run ("gf"):
+    solve(0, "") → pick 'g': solve(1, "g") → pick 'f': add "gf"
+                                             → skip 'f': add "g"
+                 → skip 'g': solve(1, "")  → pick 'f': add "f"
+                                             → skip 'f': add ""
+    Set = {"gf", "g", "f", ""} → size = 4 ✓
 
 =============================================================================
 */
 
-function solve(s, index, temp, set) {
-    // Base case: processed all characters
-    if (index === s.length) {
-        set.add(temp);   // Set handles duplicates automatically
-        return;
-    }
-
-    // INCLUDE current character
-    solve(s, index + 1, temp + s[index], set);
-
-    // EXCLUDE current character
-    solve(s, index + 1, temp, set);
-}
-
 function distinctSubsequences(s) {
     let set = new Set();
-    solve(s, 0, "", set);
+
+    function solve(index, temp) {
+        if (index === s.length) {
+            set.add(temp);
+            return;
+        }
+        solve(index + 1, temp + s[index]);  // Include
+        solve(index + 1, temp);              // Exclude
+    }
+
+    solve(0, "");
     return set.size % (1e9 + 7);
 }
 
@@ -65,4 +52,4 @@ function distinctSubsequences(s) {
 // ==========================================================================
 console.log(distinctSubsequences("gfg"));  // 7
 console.log(distinctSubsequences("abc"));  // 8
-console.log(distinctSubsequences("aa"));   // 3 ("", "a", "aa")
+console.log(distinctSubsequences("aa"));   // 3

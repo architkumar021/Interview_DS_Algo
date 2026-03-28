@@ -1,89 +1,90 @@
-// 2707. Extra Characters in a String
-// You are given a 0-indexed string s and a dictionary of words dictionary. You have to break s into one or more non-overlapping substrings such that each substring is present in dictionary. There may be some extra characters in s which are not present in any of the substrings.
+/*
+=============================================================================
+  QUESTION: 2707. Extra Characters in a String (LeetCode)
+=============================================================================
 
-// Return the minimum number of extra characters left over if you break up s optimally.
+  Break string s using words from dictionary. Return minimum number of
+  extra characters left over (not part of any dictionary word).
 
- 
+  Example: s="leetscode", dict=["leet","code","leetcode"] → 1
+    "leet" + "s" + "code" → 1 extra char at index 4
 
-// Example 1:
+  Example: s="sayhelloworld", dict=["hello","world"] → 3
+    "say" + "hello" + "world" → 3 extra chars
 
-// Input: s = "leetscode", dictionary = ["leet","code","leetcode"]
-// Output: 1
-// Explanation: We can break s in two substrings: "leet" from index 0 to 3 and "code" from index 5 to 8. There is only 1 unused character (at index 4), so we return 1.
+=============================================================================
+  PATTERN: Front Partition DP
+=============================================================================
 
-// Example 2:
+  solve(i) = min extra chars for s[i..n-1].
 
-// Input: s = "sayhelloworld", dictionary = ["hello","world"]
-// Output: 3
-// Explanation: We can break s in two substrings: "hello" from index 3 to 7 and "world" from index 8 to 12. The characters at indices 0, 1, 2 are not used in any substring and thus are considered as extra characters. Hence, we return 3.
+  At index i, two options:
+    1. Skip s[i] as extra: 1 + solve(i+1)
+    2. Try every substring s[i..j]: if it's in dictionary → solve(j+1)
 
-/**
- * @param {string} s
- * @param {string[]} dictionary
- * @return {number}
- */
-var minExtraChar = function (s, dictionary) {
-    const n = s.length;
-    const dp = new Array(n).fill();
-    const set = new Set(dictionary);
-  
-    return helper(s, set, dp, 0);
-  };
-  
-  function helper(s, set, dp, idx) {
-    if (idx >= s.length) return 0;
-    if (dp[idx] !== undefined) return dp[idx];
-  
-    let result = 1 + helper(s, set, dp, idx + 1);
-    for (let i = idx; i < s.length; i++) {
-      const substring = s.slice(idx, i + 1);
-      if (!set.has(substring)) continue;
-  
-      const next = helper(s, set, dp, i + 1);
-      result = Math.min(result, next);
-    }
-  
-    return (dp[idx] = result);
-  }
+  Take minimum over all options.
 
-// #########  Recursion + Memoization ######################
-/**
- * @param {string} s
- * @param {string[]} dictionary
- * @return {number}
- */
-var minExtraChar = function (s, dictionary) {
-    let dicSet = new Set(dictionary);
+  Base: i == n → 0 (nothing left)
+
+=============================================================================
+  APPROACH 1: Memoization — O(N²) Time, O(N) Space
+=============================================================================
+*/
+
+function minExtraCharMemo(s, dictionary) {
     let n = s.length;
+    let dict = new Set(dictionary);
+    let dp = new Array(n).fill(-1);
 
-    let memo = new Map();
+    function solve(i) {
+        if (i >= n) return 0;
+        if (dp[i] !== -1) return dp[i];
 
-    function solve(idx) {
-        let minExtra = n;
+        // Option 1: skip s[i] as extra character
+        let ans = 1 + solve(i + 1);
 
-        if(idx >= n) return 0;
-
-        if(memo.has(idx)) return memo.get(idx);
-
-        let currentString = '';        
-        for(let i = idx; i < n; i++) {                                   
-            currentString = currentString + s[i];            
-
-            let currExtra = dicSet.has(currentString) ? 0 : currentString.length;
-            let remExtra = solve(i + 1); 
-             
-            let totalExtra = currExtra + remExtra; 
-
-            minExtra = Math.min(minExtra, totalExtra);  
-            memo.set(idx, minExtra);
-        }        
-
-        return minExtra;
+        // Option 2: try matching s[i..j] with dictionary words
+        let curr = '';
+        for (let j = i; j < n; j++) {
+            curr += s[j];
+            if (dict.has(curr)) {
+                ans = Math.min(ans, solve(j + 1));
+            }
+        }
+        return dp[i] = ans;
     }
 
     return solve(0);
 }
 
-console.log(minExtraChar("leetscode", ["leet","code","leetcode"]));
+/*
+=============================================================================
+  APPROACH 2: Tabulation — O(N²) Time, O(N) Space
+=============================================================================
+*/
 
-// #########  Bottom up  ######################
+function minExtraChar(s, dictionary) {
+    let n = s.length;
+    let dict = new Set(dictionary);
+    let dp = new Array(n + 1).fill(0);
+
+    for (let i = n - 1; i >= 0; i--) {
+        dp[i] = 1 + dp[i + 1];  // skip s[i]
+
+        let curr = '';
+        for (let j = i; j < n; j++) {
+            curr += s[j];
+            if (dict.has(curr)) {
+                dp[i] = Math.min(dp[i], dp[j + 1]);
+            }
+        }
+    }
+    return dp[0];
+}
+
+// ==========================================================================
+// DRIVER CODE
+// ==========================================================================
+console.log(minExtraCharMemo("leetscode", ["leet", "code", "leetcode"]));  // 1
+console.log(minExtraChar("leetscode", ["leet", "code", "leetcode"]));      // 1
+console.log(minExtraChar("sayhelloworld", ["hello", "world"]));            // 3

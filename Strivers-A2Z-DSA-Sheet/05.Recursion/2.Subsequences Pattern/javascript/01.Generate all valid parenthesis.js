@@ -3,75 +3,42 @@
   QUESTION: 22. Generate Parentheses (LeetCode)
 =============================================================================
 
-  Given n pairs of parentheses, generate all combinations of well-formed parentheses.
+  Given n pairs of parentheses, generate all valid (well-formed) combinations.
 
-  Example: n=3 → ["((()))","(()())","(())()","()(())","()()()"]
-  Example: n=1 → ["()"]
+  Examples:
+    n = 1 → ["()"]
+    n = 3 → ["((()))","(()())","(())()","()(())","()()()"]
 
 =============================================================================
-  APPROACH: Recursion with Open/Close Count
+  APPROACH: Recursion with Open/Close Count — O(2^N × N) Time, O(N) Space
 =============================================================================
 
-  Rules for valid parentheses:
-  1. We can add '(' if open count < n
-  2. We can add ')' ONLY if close count < open count
-     (can't close what hasn't been opened)
-  3. When open == n && close == n → valid string of length 2n
+  Rules:
+  - Add '(' if open < n
+  - Add ')' only if close < open (can't close what isn't opened)
+  - When both open and close == n → valid string, push to result
 
-  Recursion tree for n=2:
-  ────────────────────────
-                      ""
-                      |
-                     "("
-                   /      \
-               "(("        "()"
-              /    \          |
-          "(()"   INVALID   "()(""
-            |                  |
-         "(())"             "()()"
-            ✓                  ✓
-
-  DRY RUN with n=2:
-  ──────────────────
-  solve("", open=0, close=0, n=2)
-    open(0) <= n(2) → solve("(", 1, 0, 2)
-      open(1) <= n(2) → solve("((", 2, 0, 2)
-        open(2) > close(0) → solve("(()", 2, 1, 2)
-          open(2) > close(1) → solve("(())", 2, 2, 2)
-            open==n && close==n → PUSH "(())" ✓
-      open(1) > close(0) → solve("()", 1, 1, 2)
-        open(1) <= n(2) → solve("()(", 2, 1, 2)
-          open(2) > close(1) → solve("()()", 2, 2, 2)
-            open==n && close==n → PUSH "()()" ✓
-
-  Result: ["(())", "()()"] ✓
-
-  Time Complexity:  O(2^N × N) — Catalan number of valid strings
-  Space Complexity: O(N) — recursion depth = 2N
+  Dry Run (n=2):
+    ""  →  "("  →  "(("  →  "(()"  →  "(())" ✓
+                →  "()"  →  "()("  →  "()()" ✓
 
 =============================================================================
 */
 
-function solve(ans, s, open, close, n) {
-    // Base case: used all n open and n close brackets
-    if (open === n && close === n) {
-        ans.push(s);
-        return;
+function generateParenthesis(n) {
+    let result = [];
+
+    function solve(s, open, close) {
+        if (open === n && close === n) {
+            result.push(s);
+            return;
+        }
+        if (open < n) solve(s + '(', open + 1, close);
+        if (close < open) solve(s + ')', open, close + 1);
     }
 
-    // Can add '(' if we haven't used all n opening brackets
-    if (open <= n)
-        solve(ans, s + '(', open + 1, close, n);
-
-    // Can add ')' only if there's an unmatched '(' (close < open)
-    if (open > close)
-        solve(ans, s + ')', open, close + 1, n);
-}
-
-function generateParenthesis(n) {
-    let ans = [];
-    solve(ans, "", 0, 0, n);
-    return ans;
+    solve("", 0, 0);
+    return result;
 }
 
 // ==========================================================================
