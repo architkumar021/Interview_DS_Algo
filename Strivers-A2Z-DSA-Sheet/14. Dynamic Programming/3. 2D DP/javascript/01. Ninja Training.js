@@ -53,20 +53,20 @@
 
 function ninjaTrainingMemo(points) {
     let n = points.length;
-    // dp[day][prev]: prev=0,1,2 (last activity), 3=none
+    // dp[day][last]: last=0,1,2 (last activity done), 3=none yet
     let dp = Array.from({ length: n }, () => new Array(4).fill(-1));
 
-    function solve(day, prev) {
+    function solve(day, last) {
         if (day < 0) return 0;
-        if (dp[day][prev] !== -1) return dp[day][prev];
+        if (dp[day][last] !== -1) return dp[day][last];
 
-        let ans = 0;
-        for (let i = 0; i < 3; i++) {
-            if (i !== prev) {
-                ans = Math.max(ans, points[day][i] + solve(day - 1, i));
+        let best = 0;
+        for (let activity = 0; activity < 3; activity++) {
+            if (activity !== last) {
+                best = Math.max(best, points[day][activity] + solve(day - 1, activity));
             }
         }
-        return dp[day][prev] = ans;
+        return dp[day][last] = best;
     }
 
     return solve(n - 1, 3); // 3 = no previous activity
@@ -97,19 +97,24 @@ function ninjaTrainingTab(points) {
     let n = points.length;
     let dp = Array.from({ length: n }, () => new Array(3).fill(0));
 
-    // Base: day 0
-    for (let j = 0; j < 3; j++) dp[0][j] = points[0][j];
+    // Base: day 0 — just copy the points
+    for (let activity = 0; activity < 3; activity++) {
+        dp[0][activity] = points[0][activity];
+    }
 
-    for (let i = 1; i < n; i++) {
-        for (let j = 0; j < 3; j++) {
-            for (let k = 0; k < 3; k++) {
-                if (j !== k) {
-                    dp[i][j] = Math.max(dp[i][j], points[i][j] + dp[i - 1][k]);
+    for (let day = 1; day < n; day++) {
+        for (let activity = 0; activity < 3; activity++) {
+            // Best score from yesterday, excluding this activity
+            let bestPrev = 0;
+            for (let prev = 0; prev < 3; prev++) {
+                if (prev !== activity) {
+                    bestPrev = Math.max(bestPrev, dp[day - 1][prev]);
                 }
             }
+            dp[day][activity] = points[day][activity] + bestPrev;
         }
     }
-    return Math.max(...dp[n - 1]);
+    return Math.max(dp[n - 1][0], dp[n - 1][1], dp[n - 1][2]);
 }
 
 /*
@@ -131,20 +136,28 @@ function ninjaTrainingTab(points) {
 
 function ninjaTraining(points) {
     let n = points.length;
-    let prev = [...points[0]];
 
-    for (let i = 1; i < n; i++) {
-        let curr = [0, 0, 0];
-        for (let j = 0; j < 3; j++) {
-            for (let k = 0; k < 3; k++) {
-                if (j !== k) {
-                    curr[j] = Math.max(curr[j], points[i][j] + prev[k]);
+    // prev[activity] = best score up to previous day, ending with that activity
+    let prev = new Array(3);
+    for (let activity = 0; activity < 3; activity++) {
+        prev[activity] = points[0][activity];
+    }
+
+    for (let day = 1; day < n; day++) {
+        let curr = new Array(3);
+        for (let activity = 0; activity < 3; activity++) {
+            // Best score from yesterday, excluding this activity
+            let bestPrev = 0;
+            for (let p = 0; p < 3; p++) {
+                if (p !== activity) {
+                    bestPrev = Math.max(bestPrev, prev[p]);
                 }
             }
+            curr[activity] = points[day][activity] + bestPrev;
         }
         prev = curr;
     }
-    return Math.max(...prev);
+    return Math.max(prev[0], prev[1], prev[2]);
 }
 
 // ==========================================================================
