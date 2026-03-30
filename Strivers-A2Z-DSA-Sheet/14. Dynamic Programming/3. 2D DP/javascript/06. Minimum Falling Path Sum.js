@@ -45,14 +45,14 @@
 
 function minFallingPathSumMemo(matrix) {
     let n = matrix.length;
-    let dp = Array.from({ length: n }, () => new Array(n).fill(-1));
+    let dp = Array.from({ length: n }, () => new Array(n).fill(undefined));
 
     function solve(i, j) {
         // Out of bounds
         if (j < 0 || j >= n) return 1e9;
         // Base: first row
         if (i === 0) return matrix[0][j];
-        if (dp[i][j] !== -1) return dp[i][j];
+        if (dp[i][j] !== undefined) return dp[i][j];
 
         // Three possible parents: up-left, up, up-right
         let a = solve(i - 1, j - 1);
@@ -71,7 +71,67 @@ function minFallingPathSumMemo(matrix) {
 
 /*
 =============================================================================
-  APPROACH 2: Space Optimized — O(N²) Time, O(N) Space
+  APPROACH 2: Tabulation (Bottom-Up) — O(N²) Time, O(N²) Space
+=============================================================================
+
+  Build dp table row by row from top to bottom.
+  dp[row][col] = minimum falling path sum to reach (row, col).
+
+  Steps:
+    1. Copy first row as-is → dp[0][col] = matrix[0][col].
+    2. For each subsequent row, each cell picks the minimum of its
+       three possible parents (up-left, up, up-right) + current value.
+    3. Answer = minimum value in the last row of dp.
+
+  Dry Run: [[2,1,3],[6,5,4],[7,8,9]]
+
+    dp[0] = [2, 1, 3]                        ← copy first row
+
+    row=1, col=0: min(∞, 2, 1) + 6 = 7
+    row=1, col=1: min(2, 1, 3) + 5 = 6
+    row=1, col=2: min(1, 3, ∞) + 4 = 5
+    dp[1] = [7, 6, 5]
+
+    row=2, col=0: min(∞, 7, 6) + 7 = 13
+    row=2, col=1: min(7, 6, 5) + 8 = 13
+    row=2, col=2: min(6, 5, ∞) + 9 = 14
+    dp[2] = [13, 13, 14]
+
+    Answer: min(13, 13, 14) = 13 ✓
+
+=============================================================================
+*/
+
+function minFallingPathSumTab(matrix) {
+    let n = matrix.length;
+    let dp = Array.from({ length: n }, () => new Array(n).fill(0));
+
+    // Base case: first row
+    for (let col = 0; col < n; col++) {
+        dp[0][col] = matrix[0][col];
+    }
+
+    // Fill row by row
+    for (let row = 1; row < n; row++) {
+        for (let col = 0; col < n; col++) {
+            let upLeft  = col > 0     ? dp[row - 1][col - 1] : 1e9;
+            let up      = dp[row - 1][col];
+            let upRight = col < n - 1 ? dp[row - 1][col + 1] : 1e9;
+            dp[row][col] = Math.min(upLeft, up, upRight) + matrix[row][col];
+        }
+    }
+
+    // Answer: minimum in last row
+    let ans = 1e9;
+    for (let col = 0; col < n; col++) {
+        ans = Math.min(ans, dp[n - 1][col]);
+    }
+    return ans;
+}
+
+/*
+=============================================================================
+  APPROACH 3: Space Optimized — O(N²) Time, O(N) Space
 =============================================================================
 
   dp[i][j] depends on dp[i-1][j-1], dp[i-1][j], dp[i-1][j+1] → just prev row.
@@ -106,5 +166,6 @@ function minFallingPathSum(matrix) {
 // DRIVER CODE
 // ==========================================================================
 console.log(minFallingPathSumMemo([[2,1,3],[6,5,4],[7,8,9]]));  // 13
+console.log(minFallingPathSumTab([[2,1,3],[6,5,4],[7,8,9]]));   // 13
 console.log(minFallingPathSum([[2,1,3],[6,5,4],[7,8,9]]));      // 13
 
