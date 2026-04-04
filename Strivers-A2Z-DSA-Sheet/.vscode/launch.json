@@ -1,0 +1,60 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Program",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${file}"
+        },
+        {
+            "name": "Node.js: Debug Current File",
+            "type": "node",
+            "request": "launch",
+            "program": "${file}",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Node.js: Run Current File (No Debug)",
+            "type": "node-terminal",
+            "request": "launch",
+            "command": "node \"${file}\"",
+            "noDebug": true
+        },
+        // =========================
+        // PYTHON CONFIGS
+        // =========================
+        {
+            "name": "Python: Debug Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "python": "${env:HOME}/python/.venv/bin/python3",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: Run Current File (No Debug)",
+            "type": "node-terminal",
+            "request": "launch",
+            "command": "${env:HOME}/python/.venv/bin/python3 \"${file}\""
+        },
+        // Optional: Run module (e.g., flask, pytest)
+        {
+            "name": "Python: Debug Module",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "app",
+            "python": "${env:HOME}/python/.venv/bin/python3",
+            "justMyCode": true
+        }
+    ]
+}
