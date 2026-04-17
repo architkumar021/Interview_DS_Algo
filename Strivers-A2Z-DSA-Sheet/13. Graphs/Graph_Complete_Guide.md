@@ -16,37 +16,43 @@
    - [Comparison](#44-comparison)
 5. [Graph Traversals](#5-graph-traversals)
    - [BFS (Breadth-First Search)](#51-bfs-breadth-first-search)
-   - [DFS (Depth-First Search)](#52-dfs-depth-first-search)
-   - [BFS vs DFS — When to Use Which?](#53-bfs-vs-dfs--when-to-use-which)
+   - [Multi-Source BFS](#52-multi-source-bfs)
+   - [DFS (Depth-First Search)](#53-dfs-depth-first-search)
+   - [BFS vs DFS — When to Use Which?](#54-bfs-vs-dfs--when-to-use-which)
 6. [Connected Components](#6-connected-components)
-7. [Cycle Detection](#7-cycle-detection)
-   - [Undirected Graph](#71-undirected-graph)
-   - [Directed Graph](#72-directed-graph)
-8. [Topological Sorting](#8-topological-sorting)
-   - [DFS-Based (Kahn-like post-order)](#81-dfs-based)
-   - [BFS-Based (Kahn's Algorithm)](#82-bfs-based-kahns-algorithm)
-9. [Shortest Path Algorithms](#9-shortest-path-algorithms)
-   - [BFS (Unweighted)](#91-bfs-unweighted)
-   - [Dijkstra's Algorithm](#92-dijkstras-algorithm)
-   - [Bellman-Ford Algorithm](#93-bellman-ford-algorithm)
-   - [Floyd-Warshall Algorithm](#94-floyd-warshall-algorithm)
-   - [Which Shortest Path Algorithm to Use?](#95-which-shortest-path-algorithm-to-use)
-10. [Minimum Spanning Tree (MST)](#10-minimum-spanning-tree-mst)
-    - [Prim's Algorithm](#101-prims-algorithm)
-    - [Kruskal's Algorithm](#102-kruskals-algorithm)
-    - [Prim's vs Kruskal's](#103-prims-vs-kruskals)
-11. [Disjoint Set Union (Union-Find)](#11-disjoint-set-union-union-find)
-12. [Advanced Algorithms](#12-advanced-algorithms)
-    - [Bridges & Articulation Points (Tarjan's)](#121-bridges--articulation-points-tarjans)
-    - [Strongly Connected Components (Kosaraju's)](#122-strongly-connected-components-kosarajus)
-13. [Key Patterns & Tricks for Interviews](#13-key-patterns--tricks-for-interviews)
-14. [Common Graph Problem Types](#14-common-graph-problem-types)
-15. [Graph vs Tree](#15-graph-vs-tree)
-16. [Counting Graphs](#16-counting-graphs)
-17. [Complexity Cheat Sheet](#17-complexity-cheat-sheet)
-18. [Common Mistakes](#18-common-mistakes)
-19. [Interview Cheat Sheet](#19-interview-cheat-sheet)
-20. [Problem Map — All Covered Problems](#20-problem-map--all-covered-problems)
+7. [Bipartite Graph Check](#7-bipartite-graph-check)
+8. [Cycle Detection](#8-cycle-detection)
+   - [Undirected Graph](#81-undirected-graph)
+   - [Directed Graph](#82-directed-graph)
+9. [Topological Sorting](#9-topological-sorting)
+   - [DFS-Based (Kahn-like post-order)](#91-dfs-based)
+   - [BFS-Based (Kahn's Algorithm)](#92-bfs-based-kahns-algorithm)
+10. [Shortest Path Algorithms](#10-shortest-path-algorithms)
+   - [BFS (Unweighted)](#101-bfs-unweighted)
+   - [0-1 BFS](#102-0-1-bfs)
+   - [Shortest Path in DAG](#103-shortest-path-in-dag)
+   - [Dijkstra's Algorithm](#104-dijkstras-algorithm)
+   - [Bellman-Ford Algorithm](#105-bellman-ford-algorithm)
+   - [Floyd-Warshall Algorithm](#106-floyd-warshall-algorithm)
+   - [Path Reconstruction](#107-path-reconstruction)
+   - [Which Shortest Path Algorithm to Use?](#108-which-shortest-path-algorithm-to-use)
+11. [Minimum Spanning Tree (MST)](#11-minimum-spanning-tree-mst)
+    - [Prim's Algorithm](#111-prims-algorithm)
+    - [Kruskal's Algorithm](#112-kruskals-algorithm)
+    - [Prim's vs Kruskal's](#113-prims-vs-kruskals)
+12. [Disjoint Set Union (Union-Find)](#12-disjoint-set-union-union-find)
+13. [Advanced Algorithms](#13-advanced-algorithms)
+    - [Bridges & Articulation Points (Tarjan's)](#131-bridges--articulation-points-tarjans)
+    - [Strongly Connected Components (Kosaraju's)](#132-strongly-connected-components-kosarajus)
+    - [Euler Path & Circuit (Hierholzer's)](#133-euler-path--circuit-hierholzers)
+14. [Key Patterns & Tricks for Interviews](#14-key-patterns--tricks-for-interviews)
+15. [Common Graph Problem Types](#15-common-graph-problem-types)
+16. [Graph vs Tree](#16-graph-vs-tree)
+17. [Counting Graphs](#17-counting-graphs)
+18. [Complexity Cheat Sheet](#18-complexity-cheat-sheet)
+19. [Common Mistakes](#19-common-mistakes)
+20. [Interview Cheat Sheet](#20-interview-cheat-sheet)
+21. [Problem Map — All Covered Problems](#21-problem-map--all-covered-problems)
 
 ---
 
@@ -363,7 +369,55 @@ def bfs(V, adj, src):
 
 ---
 
-### 5.2 DFS (Depth-First Search)
+### 5.2 Multi-Source BFS
+
+When the problem requires finding shortest distances from **multiple sources simultaneously**, push ALL sources into the queue at the start.
+
+```
+1. Push ALL source nodes into queue, mark them visited, set dist = 0
+2. BFS normally — each level increments distance by 1
+3. First time a cell is reached = shortest distance from ANY source
+```
+
+```javascript
+// Multi-source BFS — e.g., Rotten Oranges, 01 Matrix
+function multiSourceBFS(grid, sources) {
+    let rows = grid.length, cols = grid[0].length;
+    let dis = Array.from({ length: rows }, () => new Array(cols).fill(-1));
+    let queue = [];
+
+    // Push ALL sources at once (distance 0)
+    for (let [r, c] of sources) {
+        queue.push([r, c]);
+        dis[r][c] = 0;
+    }
+
+    let dr = [-1, 1, 0, 0];
+    let dc = [0, 0, -1, 1];
+
+    while (queue.length > 0) {
+        let [r, c] = queue.shift();
+        for (let d = 0; d < 4; d++) {
+            let nr = r + dr[d], nc = c + dc[d];
+            if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && dis[nr][nc] === -1) {
+                dis[nr][nc] = dis[r][c] + 1;
+                queue.push([nr, nc]);
+            }
+        }
+    }
+    return dis;
+}
+```
+
+**Time:** O(V + E) or O(m × n) for grids | **Space:** O(V)
+
+> 🔑 **Key Insight:** Multi-source BFS is NOT "run BFS from each source separately." We push all sources at once, so the BFS naturally finds the nearest source for every cell in a single pass.
+
+**Examples:** Rotten Oranges, 01 Matrix, Walls and Gates
+
+---
+
+### 5.3 DFS (Depth-First Search)
 
 Explores **as deep as possible** along each branch before backtracking.
 
@@ -464,7 +518,7 @@ function dfsIterative(V, adj, src) {
 
 ---
 
-### 5.3 BFS vs DFS — When to Use Which?
+### 5.4 BFS vs DFS — When to Use Which?
 
 | Scenario | Use | Why |
 |----------|-----|-----|
@@ -523,9 +577,67 @@ function countComponents(V, adj) {
 
 ---
 
-## 7. Cycle Detection
+## 7. Bipartite Graph Check
 
-### 7.1 Undirected Graph
+A graph is **bipartite** if its vertices can be divided into two disjoint sets such that every edge connects a vertex in one set to a vertex in the other (no edge within the same set). Equivalently, the graph is **2-colorable**.
+
+> 🔑 **A graph is bipartite ⟺ it contains no odd-length cycles.**
+
+**Approach:** BFS/DFS 2-coloring. Assign colors `0` and `1`. If a neighbor already has the **same** color → NOT bipartite.
+
+```javascript
+// JavaScript — Bipartite Check (BFS)
+function isBipartite(V, adj) {
+    let color = new Array(V).fill(-1);
+
+    for (let i = 0; i < V; i++) {
+        if (color[i] !== -1) continue;  // already colored
+        color[i] = 0;
+        let queue = [i];
+
+        while (queue.length > 0) {
+            let node = queue.shift();
+            for (let neighbor of adj[node]) {
+                if (color[neighbor] === -1) {
+                    color[neighbor] = 1 - color[node];  // opposite color
+                    queue.push(neighbor);
+                } else if (color[neighbor] === color[node]) {
+                    return false;  // Same color → NOT bipartite
+                }
+            }
+        }
+    }
+    return true;
+}
+```
+
+```javascript
+// JavaScript — Bipartite Check (DFS)
+function isBipartiteDFS(node, adj, color) {
+    for (let neighbor of adj[node]) {
+        if (color[neighbor] === -1) {
+            color[neighbor] = 1 - color[node];
+            if (!isBipartiteDFS(neighbor, adj, color)) return false;
+        } else if (color[neighbor] === color[node]) {
+            return false;
+        }
+    }
+    return true;
+}
+```
+
+**Time:** O(V + E) | **Space:** O(V)
+
+**Common Use Cases:**
+- ✅ Checking if a graph is 2-colorable
+- ✅ Dividing into two teams/groups
+- ✅ Detecting odd-length cycles
+
+---
+
+## 8. Cycle Detection
+
+### 8.1 Undirected Graph
 
 **Approach:** DFS with parent tracking. If we visit a node already visited and it's NOT the parent, there's a cycle.
 
@@ -547,30 +659,51 @@ function hasCycleDFS(node, parent, adj, vis) {
 
 ---
 
-### 7.2 Directed Graph
+### 8.2 Directed Graph
 
-**Approach:** DFS with path tracking. Maintain a `pathVis[]` array to track nodes in the current DFS path. If we revisit a node in the current path, it's a cycle.
+**Approach:** DFS with path tracking. Maintain two arrays:
+- `vis[]` — globally visited (never unset)
+- `pathVis[]` — tracks nodes in the **current** DFS path (backtracked when leaving)
+
+If we revisit a node that is in the current path (`pathVis[neighbor] === true`), it's a cycle.
 
 ```javascript
-function hasCycleDFS(node, adj, vis) {
-    vis[node] = true;   // marks as "in current path"
+function hasCycleDFS(node, adj, vis, pathVis) {
+    vis[node] = true;
+    pathVis[node] = true;
+
     for (let neighbor of adj[node]) {
         if (!vis[neighbor]) {
-            if (hasCycleDFS(neighbor, adj, vis)) return true;
-        } else if (vis[neighbor]) {
+            if (hasCycleDFS(neighbor, adj, vis, pathVis)) return true;
+        } else if (pathVis[neighbor]) {
             return true;  // Already in current DFS path → cycle!
         }
     }
-    vis[node] = false;  // backtrack: remove from current path
+
+    pathVis[node] = false;  // backtrack: remove from current path
+    return false;
+}
+
+function detectCycleDirected(V, adj) {
+    let vis = new Array(V).fill(false);
+    let pathVis = new Array(V).fill(false);
+
+    for (let i = 0; i < V; i++) {
+        if (!vis[i]) {
+            if (hasCycleDFS(i, adj, vis, pathVis)) return true;
+        }
+    }
     return false;
 }
 ```
+
+> 🔑 **Why two arrays?** A single `vis[]` can't distinguish between "fully processed in a previous DFS" vs "currently on the active path." Only nodes on the **current path** indicate a back edge (cycle). Without `pathVis`, cross edges to already-finished nodes would be falsely flagged as cycles.
 
 **Alternative:** Kahn's Algorithm (BFS) — if topological sort doesn't include all nodes → cycle exists.
 
 ---
 
-## 8. Topological Sorting
+## 9. Topological Sorting
 
 > Topological sorting is a linear ordering of vertices in a **DAG** such that for every directed edge `u → v`, vertex `u` comes **before** `v` in the ordering.
 
@@ -586,7 +719,7 @@ Topological order: 4, 5, 0, 2, 3, 1  (or  5, 4, 0, 2, 3, 1  etc.)
 
 ---
 
-### 8.1 DFS-Based
+### 9.1 DFS-Based
 
 ```javascript
 function topoDFS(node, adj, vis, stack) {
@@ -610,7 +743,7 @@ function topoSort(V, adj) {
 
 ---
 
-### 8.2 BFS-Based (Kahn's Algorithm)
+### 9.2 BFS-Based (Kahn's Algorithm)
 
 ```
 1. Calculate in-degree of every node
@@ -651,9 +784,9 @@ function kahnsAlgorithm(V, adj) {
 
 ---
 
-## 9. Shortest Path Algorithms
+## 10. Shortest Path Algorithms
 
-### 9.1 BFS (Unweighted)
+### 10.1 BFS (Unweighted)
 
 For **unweighted** graphs (or unit weight), BFS gives the shortest path directly.
 
@@ -680,7 +813,94 @@ function bfsShortestPath(V, adj, src) {
 
 ---
 
-### 9.2 Dijkstra's Algorithm
+### 10.2 0-1 BFS
+
+For graphs where edge weights are **only 0 or 1**. Uses a **deque** instead of a priority queue — O(V + E) instead of O((V+E) log V).
+
+**Key Idea:** When processing a node, if an edge has weight 0, push the neighbor to the **front** of the deque (same level); if weight 1, push to the **back** (next level).
+
+```javascript
+function zeroOneBFS(V, adj, src) {
+    let dis = new Array(V).fill(Infinity);
+    dis[src] = 0;
+    let deque = [src];  // use as deque: shift() for front, push() for back
+
+    while (deque.length > 0) {
+        let u = deque.shift();
+        for (let [v, wt] of adj[u]) {
+            if (dis[u] + wt < dis[v]) {
+                dis[v] = dis[u] + wt;
+                if (wt === 0) {
+                    deque.unshift(v);  // weight 0 → push front
+                } else {
+                    deque.push(v);     // weight 1 → push back
+                }
+            }
+        }
+    }
+    return dis;
+}
+```
+
+**Time:** O(V + E) | **Space:** O(V)
+
+> 🔑 **When to use?** Whenever edges have only two distinct weights (often 0 and 1). Much faster than Dijkstra's for this special case. Common in grid problems where some moves are "free."
+
+---
+
+### 10.3 Shortest Path in DAG
+
+For **DAGs with any weights** (even negative), we can find shortest paths in O(V + E) using topological sort + relaxation. Faster than Dijkstra's and Bellman-Ford for DAGs.
+
+```
+1. Topological sort the DAG
+2. Set dist[src] = 0, all others = ∞
+3. Process nodes in topo order:
+   - For each outgoing edge (u → v, wt): relax dist[v] = min(dist[v], dist[u] + wt)
+```
+
+```javascript
+function shortestPathDAG(V, adj, src) {
+    // Step 1: Topological sort (DFS-based)
+    let vis = new Array(V).fill(false);
+    let stack = [];
+
+    function topoDFS(node) {
+        vis[node] = true;
+        for (let [v, wt] of adj[node]) {
+            if (!vis[v]) topoDFS(v);
+        }
+        stack.push(node);
+    }
+
+    for (let i = 0; i < V; i++) {
+        if (!vis[i]) topoDFS(i);
+    }
+    stack.reverse();
+
+    // Step 2: Relaxation in topo order
+    let dis = new Array(V).fill(Infinity);
+    dis[src] = 0;
+
+    for (let u of stack) {
+        if (dis[u] === Infinity) continue;
+        for (let [v, wt] of adj[u]) {
+            if (dis[u] + wt < dis[v]) {
+                dis[v] = dis[u] + wt;
+            }
+        }
+    }
+    return dis;
+}
+```
+
+**Time:** O(V + E) | **Space:** O(V)
+
+> 🔑 **This is the fastest shortest-path algorithm for DAGs.** It even handles negative weights (unlike Dijkstra's).
+
+---
+
+### 10.4 Dijkstra's Algorithm
 
 For **weighted graphs with non-negative weights**.
 
@@ -740,7 +960,7 @@ def dijkstra(V, adj, src):
 
 ---
 
-### 9.3 Bellman-Ford Algorithm
+### 10.5 Bellman-Ford Algorithm
 
 For **weighted graphs WITH negative weights**. Can detect **negative cycles**.
 
@@ -780,7 +1000,7 @@ function bellmanFord(V, edges, src) {
 
 ---
 
-### 9.4 Floyd-Warshall Algorithm
+### 10.6 Floyd-Warshall Algorithm
 
 Finds shortest path between **ALL pairs** of vertices.
 
@@ -808,11 +1028,53 @@ function floydWarshall(matrix) {
 
 ---
 
-### 9.5 Which Shortest Path Algorithm to Use?
+### 10.7 Path Reconstruction
+
+Most shortest path algorithms only give distances. To recover the **actual path**, maintain a `parent[]` array. When you relax an edge `u → v`, set `parent[v] = u`. Then backtrack from destination to source.
+
+```javascript
+// Path reconstruction with Dijkstra's
+function dijkstraWithPath(V, adj, src, dest) {
+    let dis = new Array(V).fill(Infinity);
+    let parent = new Array(V).fill(-1);
+    let pq = [[0, src]];
+    dis[src] = 0;
+
+    while (pq.length > 0) {
+        pq.sort((a, b) => a[0] - b[0]);
+        let [uwt, u] = pq.shift();
+
+        for (let [v, wt] of adj[u]) {
+            if (dis[u] + wt < dis[v]) {
+                dis[v] = dis[u] + wt;
+                parent[v] = u;
+                pq.push([dis[v], v]);
+            }
+        }
+    }
+
+    // Reconstruct path from dest → src
+    if (dis[dest] === Infinity) return { distance: -1, path: [] };
+
+    let path = [];
+    for (let node = dest; node !== -1; node = parent[node]) {
+        path.push(node);
+    }
+    path.reverse();
+    return { distance: dis[dest], path };
+}
+```
+
+> 🔑 **This parent-tracking pattern works with BFS, Dijkstra's, and Bellman-Ford.** For Floyd-Warshall, use a `next[][]` matrix instead.
+
+---
+
+### 10.8 Which Shortest Path Algorithm to Use?
 
 | Scenario | Algorithm | Time |
 |----------|-----------|------|
 | Unweighted graph | **BFS** | O(V + E) |
+| Weights 0 or 1 only | **0-1 BFS** | O(V + E) |
 | Weighted, no negative | **Dijkstra's** | O((V+E) log V) |
 | Weighted, with negative | **Bellman-Ford** | O(V × E) |
 | All pairs shortest path | **Floyd-Warshall** | O(V³) |
@@ -823,18 +1085,20 @@ function floydWarshall(matrix) {
 > ```
 > Is it unweighted?
 >   YES → BFS
->   NO → Are there negative weights?
->     NO → Dijkstra's
->     YES → Bellman-Ford
+>   NO → Are edge weights only 0 and 1?
+>     YES → 0-1 BFS (deque)
+>     NO → Is it a DAG?
+>       YES → Topo Sort + Relax (fastest, handles negatives)
+>       NO → Are there negative weights?
+>         NO → Dijkstra's
+>         YES → Bellman-Ford
 > Need all-pairs?
 >   YES → Floyd-Warshall
-> Is it a DAG?
->   YES → Topo Sort + Relax (fastest for DAGs)
 > ```
 
 ---
 
-## 10. Minimum Spanning Tree (MST)
+## 11. Minimum Spanning Tree (MST)
 
 > A **Minimum Spanning Tree** of a connected, weighted, undirected graph is a subset of edges that connects all vertices with the **minimum total edge weight** and forms a tree (no cycles).
 
@@ -845,7 +1109,7 @@ Properties:
 
 ---
 
-### 10.1 Prim's Algorithm
+### 11.1 Prim's Algorithm
 
 **Greedy approach** — grow the MST one vertex at a time.
 
@@ -881,7 +1145,7 @@ function prims(V, adj) {
 
 ---
 
-### 10.2 Kruskal's Algorithm
+### 11.2 Kruskal's Algorithm
 
 **Greedy approach** — sort all edges, add them one by one if they don't form a cycle (using Union-Find).
 
@@ -913,7 +1177,7 @@ function kruskals(V, edges) {
 
 ---
 
-### 10.3 Prim's vs Kruskal's
+### 11.3 Prim's vs Kruskal's
 
 | Feature | Prim's | Kruskal's |
 |---------|--------|-----------|
@@ -925,7 +1189,7 @@ function kruskals(V, edges) {
 
 ---
 
-## 11. Disjoint Set Union (Union-Find)
+## 12. Disjoint Set Union (Union-Find)
 
 A data structure to efficiently manage **dynamic connectivity** queries:
 - `find(x)` — which component does x belong to?
@@ -997,9 +1261,9 @@ class DisjointSet:
 
 ---
 
-## 12. Advanced Algorithms
+## 13. Advanced Algorithms
 
-### 12.1 Bridges & Articulation Points (Tarjan's)
+### 13.1 Bridges & Articulation Points (Tarjan's)
 
 A **bridge** is an edge whose removal disconnects the graph.
 An **articulation point** is a vertex whose removal disconnects the graph.
@@ -1020,7 +1284,7 @@ Articulation Point condition:  low[v] >= tin[u]  (for non-root)
 
 ---
 
-### 12.2 Strongly Connected Components (Kosaraju's)
+### 13.2 Strongly Connected Components (Kosaraju's)
 
 An **SCC** is a maximal subgraph where every vertex is reachable from every other vertex (in a directed graph).
 
@@ -1037,7 +1301,55 @@ An **SCC** is a maximal subgraph where every vertex is reachable from every othe
 
 ---
 
-## 13. Key Patterns & Tricks for Interviews
+### 13.3 Euler Path & Circuit (Hierholzer's)
+
+An **Euler Path** visits every **edge** exactly once. An **Euler Circuit** is an Euler Path that starts and ends at the same vertex.
+
+**Existence conditions:**
+
+| | Undirected | Directed |
+|---|---|---|
+| **Euler Circuit** | Every vertex has even degree | Every vertex has in-degree = out-degree |
+| **Euler Path** | Exactly 0 or 2 vertices have odd degree | Exactly one vertex has out−in = 1 (start), one has in−out = 1 (end), rest equal |
+
+**Hierholzer's Algorithm** finds the path/circuit in O(V + E):
+
+```
+1. Start from a valid starting vertex
+2. Follow edges (removing them), pushing onto current path
+3. When stuck (no more edges), backtrack: pop from current path → push to result
+4. Result (reversed) is the Euler path/circuit
+```
+
+```javascript
+// Hierholzer's Algorithm — Euler Path/Circuit (Directed Graph)
+function findEulerPath(V, adj) {
+    // adj[u] is a stack/list of neighbors (will be consumed)
+    let result = [];
+
+    function dfs(u) {
+        while (adj[u].length > 0) {
+            let v = adj[u].pop();  // remove edge u → v
+            dfs(v);
+        }
+        result.push(u);  // backtrack → add to result
+    }
+
+    dfs(0);  // or start from the vertex with out-in = 1
+    result.reverse();
+    return result;
+}
+```
+
+**Time:** O(V + E) | **Space:** O(V + E)
+
+> 🔑 **Euler vs Hamiltonian:** Euler visits every **edge** once. Hamiltonian visits every **vertex** once. Euler is solvable in polynomial time; Hamiltonian is NP-complete.
+
+**Examples:** Reconstruct Itinerary (LeetCode 332), Valid Arrangement of Pairs
+
+---
+
+## 14. Key Patterns & Tricks for Interviews
 
 ### Pattern 1 — Multi-Source BFS
 When the problem says "from ALL sources simultaneously":
@@ -1102,13 +1414,15 @@ Use a Set to count unique shapes.
 
 ---
 
-## 14. Common Graph Problem Types
+## 15. Common Graph Problem Types
 
 | Problem Type | Algorithm | Key Idea |
 |-------------|-----------|----------|
 | Number of components | DFS/BFS | Count DFS/BFS calls from unvisited nodes |
 | Shortest path (unweighted) | BFS | Level-by-level exploration |
+| Shortest path (0/1 weights) | 0-1 BFS | Deque: weight 0 → front, weight 1 → back |
 | Shortest path (weighted) | Dijkstra / Bellman-Ford | Min-heap / Edge relaxation |
+| Shortest path (DAG) | Topo Sort + Relax | O(V+E), handles negatives |
 | Cycle detection (undirected) | DFS + parent | Back edge to non-parent = cycle |
 | Cycle detection (directed) | DFS + path tracking | Revisit node in current path = cycle |
 | Topological sort | DFS / Kahn's | Post-order reverse / In-degree BFS |
@@ -1117,13 +1431,16 @@ Use a Set to count unique shapes.
 | SCC | Kosaraju's / Tarjan's | 2-pass DFS |
 | Bipartite | BFS/DFS 2-coloring | Neighbor same color = not bipartite |
 | Grid problems | BFS/DFS on grid | 4-directional neighbors |
+| Multi-source distance | Multi-source BFS | Push all sources at once |
 | Dynamic connectivity | Union-Find | O(1) union and find |
 | All-pairs shortest | Floyd-Warshall | O(V³) DP |
 | Negative weights | Bellman-Ford | V-1 relaxation passes |
+| Euler path/circuit | Hierholzer's | Visit every edge exactly once |
+| Path reconstruction | Parent array | Backtrack from dest to src |
 
 ---
 
-## 15. Graph vs Tree
+## 16. Graph vs Tree
 
 | Feature | Tree | Graph |
 |---------|------|-------|
@@ -1140,7 +1457,7 @@ Use a Set to count unique shapes.
 
 ---
 
-## 16. Counting Graphs
+## 17. Counting Graphs
 
 **How many undirected graphs can be formed with n vertices?**
 
@@ -1167,26 +1484,31 @@ function countingGraphs(n) {
 
 ---
 
-## 17. Complexity Cheat Sheet
+## 18. Complexity Cheat Sheet
 
 | Algorithm | Time | Space | Notes |
 |-----------|------|-------|-------|
 | BFS | O(V + E) | O(V) | Queue-based |
+| Multi-Source BFS | O(V + E) | O(V) | All sources at once |
 | DFS | O(V + E) | O(V) | Stack/recursion |
+| 0-1 BFS | O(V + E) | O(V) | Deque, weights 0/1 only |
+| Shortest Path in DAG | O(V + E) | O(V) | Topo sort + relax, handles negatives |
 | Dijkstra | O((V+E) log V) | O(V) | Min-heap, no negative weights |
 | Bellman-Ford | O(V × E) | O(V) | Handles negative weights |
 | Floyd-Warshall | O(V³) | O(V²) | All pairs |
 | Topological Sort | O(V + E) | O(V) | DAG only |
 | Kahn's Algorithm | O(V + E) | O(V) | BFS-based topo sort |
+| Bipartite Check | O(V + E) | O(V) | 2-coloring BFS/DFS |
 | Prim's MST | O(E log V) | O(V) | Min-heap |
 | Kruskal's MST | O(E log E) | O(V) | Sort + Union-Find |
 | Union-Find | O(α(n)) ≈ O(1) | O(V) | Path compression + size |
 | Tarjan's (Bridges) | O(V + E) | O(V) | DFS + tin/low |
 | Kosaraju's (SCC) | O(V + E) | O(V+E) | 2-pass DFS |
+| Hierholzer's (Euler) | O(V + E) | O(V+E) | Euler path/circuit |
 
 ---
 
-## 18. Common Mistakes
+## 19. Common Mistakes
 
 ### ❌ Forgetting to mark visited BEFORE pushing to queue (BFS)
 ```javascript
@@ -1228,7 +1550,7 @@ When using `1e9` or `Infinity` as initial distance, be careful with additions. U
 
 ---
 
-## 19. Interview Cheat Sheet
+## 20. Interview Cheat Sheet
 
 ### Quick Decision Framework
 
@@ -1306,12 +1628,12 @@ function dfsGrid(grid, r, c, vis) {
 
 ---
 
-## 20. Problem Map — All Covered Problems
+## 21. Problem Map — All Covered Problems
 
 ### 📁 1. Learning
 | # | Problem | Key Concept |
 |---|---------|-------------|
-| 01 | Count the number of graphs | Combinatorics: 2^(n*(n-1)/2) |
+| 01 | Count the number of graphs | Combinatorics: 2^(n*(n-1)/2) + Connected Components (BFS) |
 | 02 | Graph Representation | Adjacency list from edge list |
 | 03 | BFS | Breadth-first traversal |
 | 04 | DFS | Depth-first traversal |
@@ -1327,6 +1649,7 @@ function dfsGrid(grid, r, c, vis) {
 | 06 | Surrounded Regions | Border DFS + flip |
 | 07 | Number of Enclaves | Border DFS + count remaining |
 | 08 | Word Ladder | BFS on word graph |
+| 09 | Number of Islands | Connected components on grid (DFS sink / BFS) |
 | 10 | Distinct Islands | DFS + path encoding in Set |
 | 11 | Bipartite Graph | DFS 2-coloring |
 | 12 | Detect Cycle in Directed Graph | DFS + backtracking path |
