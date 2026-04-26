@@ -13,8 +13,12 @@ Example 3: Input: "a good   example"      Output: "example good a"
 ============================================================
 APPROACH 1: BRUTE FORCE - Split and Reverse
 ============================================================
-Idea:
-- Use a stringstream to extract words, store in vector, reverse, join.
+Approach:
+1. Use a stringstream to extract individual words from the input string (auto-handles multiple spaces).
+2. Store all extracted words into a vector.
+3. Reverse the vector so words are in reverse order.
+4. Join the reversed words with a single space separator.
+5. Return the resulting string.
 
 Dry Run: s = "  hello world  "
   Stream extracts: ["hello", "world"]
@@ -50,8 +54,14 @@ string reverseWords_BruteForce(string s) {
 ============================================================
 APPROACH 2: OPTIMAL - Two Pointer (In-place style, no split)
 ============================================================
-Idea:
-- Traverse from end of string, pick each word, append to result.
+Approach:
+1. Start from the END of the string and traverse backwards.
+2. Skip any trailing spaces.
+3. When a non-space character is found, mark it as the word's end (j).
+4. Continue moving left until a space or start of string is found — this gives the word's start (i+1).
+5. Extract the word using substring from i+1 to j, append it to the result with a space.
+6. Repeat until the entire string is processed.
+7. Return the result string.
 
 Dry Run: s = "  hello world  "
   i starts at 14 (last index), skip spaces → i=12 ('d')

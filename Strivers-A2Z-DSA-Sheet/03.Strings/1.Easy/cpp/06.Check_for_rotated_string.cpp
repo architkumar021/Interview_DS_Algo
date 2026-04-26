@@ -42,9 +42,11 @@ bool rotateString_BruteForce(string s, string goal) {
 ============================================================
 APPROACH 2: OPTIMAL - Concatenation Check
 ============================================================
-Idea:
-- Concatenate s with itself → contains ALL rotations as substrings.
-- Check if goal is a substring of (s + s).
+Approach:
+1. If lengths differ, return false.
+2. Concatenate s with itself: s+s contains ALL possible rotations of s as substrings.
+3. Check if goal is a substring of s+s.
+4. If found, goal is a valid rotation of s → return true. Otherwise false.
 
 Dry Run: s="abcde", goal="cdeab"
   s+s = "abcdeabcde"

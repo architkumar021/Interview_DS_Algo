@@ -55,10 +55,13 @@ bool isIsomorphic_BruteForce(string s, string t) {
 ============================================================
 APPROACH 2: OPTIMAL - Array-based Mapping (Fixed Size)
 ============================================================
-Idea:
-- Use two arrays of size 256 (ASCII) to store last seen positions.
-- For each index, check if the last position where s[i] and t[i] were seen match.
-- If they differ, strings are not isomorphic.
+Approach:
+1. Use two integer arrays of size 256 (ASCII) to store the last-seen position of each character.
+2. For each index i, check if the last position where s[i] appeared matches the last position where t[i] appeared.
+3. If they don't match, the characters have different mapping histories → return false.
+4. If they match, update both arrays with the current position (i+1 to avoid confusion with default 0).
+5. If we reach the end without mismatch, return true.
+6. This avoids hash map overhead and runs in constant space (fixed 256 array).
 
 Dry Run: s="foo", t="bar"
   Initialize: mapS[256]={0}, mapT[256]={0}

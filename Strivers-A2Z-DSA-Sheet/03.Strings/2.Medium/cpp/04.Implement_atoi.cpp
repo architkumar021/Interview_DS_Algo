@@ -18,9 +18,12 @@ Example 4: Input: "words and 987"    Output: 0
 ============================================================
 APPROACH 1: BRUTE FORCE - Parse Step by Step
 ============================================================
-Idea:
-- Handle whitespace, sign, digits explicitly in sequence.
-- Use long long to detect overflow before clamping.
+Approach:
+1. Skip all leading whitespace characters.
+2. Check for an optional '+' or '-' sign to determine positivity.
+3. Read consecutive digit characters and build the number: ans = ans * 10 + digit.
+4. Use long long to detect overflow — if ans exceeds INT_MAX, clamp to INT_MAX or INT_MIN based on sign.
+5. Apply the sign and return the result.
 
 Dry Run: s = "   -42"
   Skip spaces → i=3
@@ -67,9 +70,13 @@ int myAtoi_BruteForce(string s) {
 ============================================================
 APPROACH 2: OPTIMAL - Same logic, overflow check without long long
 ============================================================
-Idea:
-- Use int only. Before multiplying by 10, check if it would overflow:
-  if ans > INT_MAX/10, or ans == INT_MAX/10 and digit > 7 → overflow.
+Approach:
+1. Same steps: skip whitespace → check sign → read digits.
+2. Instead of using long long, detect overflow BEFORE multiplying:
+   - If ans > INT_MAX/10, the next multiply will overflow → clamp immediately.
+   - If ans == INT_MAX/10 and digit > 7, adding this digit overflows → clamp.
+3. This uses only int, avoiding platform-dependent long long behavior.
+4. Apply sign and return.
 
 Dry Run: s = "2147483648"  (INT_MAX + 1)
   Process: ans builds up: 2,21,214,2147,21474,214748,2147483,21474836

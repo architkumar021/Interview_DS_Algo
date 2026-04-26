@@ -36,10 +36,11 @@ function frequencySort_BruteForce(s) {
 ============================================================
 APPROACH 2: OPTIMAL - Bucket Sort
 ============================================================
-Idea:
-- Count frequencies. Max possible frequency = s.length.
-- Create buckets where bucket[i] holds chars with frequency i.
-- Iterate from highest bucket to lowest, build result.
+Approach:
+1. Count frequency of each character.
+2. Create buckets where bucket[i] holds all characters with frequency i.
+3. Iterate from the highest bucket to lowest, building the result.
+4. This avoids O(N log N) sorting — bucket sort is O(N).
 
 Dry Run: s = "tree"
   freq: {t:1, r:1, e:2}

@@ -10,6 +10,11 @@ Example 2: Input: "cbbd"   Output: "bb"
 ============================================================
 APPROACH 1: BRUTE FORCE - Check All Substrings
 ============================================================
+Approach:
+1. Generate all substrings using two nested loops.
+2. Check each for palindrome by comparing from both ends inward.
+3. Track the longest palindrome found.
+
 Dry Run: s = "babad"
   Check all substrings: "bab"(3) palindrome, "aba"(3) palindrome
   Longest = "bab"  ✓
@@ -42,6 +47,11 @@ def longestPalindrome_BruteForce(s: str) -> str:
 ============================================================
 APPROACH 2: OPTIMAL - Expand Around Center
 ============================================================
+Approach:
+1. For each index i, expand from center for both odd (i,i) and even (i,i+1) palindromes.
+2. While characters match, keep expanding and track the longest.
+3. Return the longest palindromic substring.
+
 Dry Run: s = "babad"
   i=0: odd "b"(1), even skip
   i=1: odd expand(1,1) → s[0]='b'==s[2]='b' → "bab"(3), max_len=3

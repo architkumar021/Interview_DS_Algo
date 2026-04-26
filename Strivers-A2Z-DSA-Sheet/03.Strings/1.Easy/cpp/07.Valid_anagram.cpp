@@ -10,8 +10,10 @@ Example 2: Input: s="rat", t="car"          Output: false
 ============================================================
 APPROACH 1: BRUTE FORCE - Sort and Compare
 ============================================================
-Idea:
-- Sort both strings and compare. Anagrams become identical when sorted.
+Approach:
+1. If lengths differ, return false immediately (anagrams must have same length).
+2. Sort both strings — anagrams become identical when sorted.
+3. Compare the sorted strings. If equal → anagram, otherwise not.
 
 Dry Run: s="anagram", t="nagaram"
   sort(s) = "aaagnmr"
@@ -37,9 +39,12 @@ bool isAnagram_BruteForce(string s, string t) {
 ============================================================
 APPROACH 2: OPTIMAL - Frequency Count Array
 ============================================================
-Idea:
-- Use a fixed array of size 26 for character counts.
-- Increment for s, decrement for t. If all zeros at end → anagram.
+Approach:
+1. If lengths differ, return false.
+2. Create a frequency array of size 26 (for lowercase English letters), initialized to 0.
+3. Iterate through both strings simultaneously: increment freq for s[i], decrement for t[i].
+4. After processing, if all values in freq are 0, the strings are anagrams.
+5. If any value is non-zero, characters don't match → not an anagram.
 
 Dry Run: s="rat", t="car"
   After s: r=1, a=1, t=1

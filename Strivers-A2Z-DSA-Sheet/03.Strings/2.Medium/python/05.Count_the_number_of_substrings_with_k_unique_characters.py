@@ -11,6 +11,11 @@ Example 2: Input: S="abaaca", K=1 Output: 7
 ============================================================
 APPROACH 1: BRUTE FORCE - Check All Substrings
 ============================================================
+Approach:
+1. Two nested loops to generate all substrings.
+2. Maintain frequency array and distinct count.
+3. If distinct == k, increment answer.
+
 Dry Run: S="aba", K=2
   "a"→1, "ab"→2 ✓, "aba"→2 ✓, "b"→1, "ba"→2 ✓, "a"→1
   Count = 3  ✓
@@ -41,6 +46,11 @@ def substrCount_BruteForce(s: str, k: int) -> int:
 ============================================================
 APPROACH 2: OPTIMAL - Sliding Window: atMost(k) - atMost(k-1)
 ============================================================
+Approach:
+1. exactlyK = atMostK(k) - atMostK(k-1).
+2. atMostK uses sliding window: expand right, shrink left when distinct > k.
+3. For each right pointer, valid substrings count = right - left + 1.
+
 Dry Run: S="aba", K=2
   atMost(2) = 6, atMost(1) = 3
   exactlyK = 6 - 3 = 3  ✓

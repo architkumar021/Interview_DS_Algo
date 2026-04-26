@@ -11,6 +11,12 @@ Example 2: Input: "aabcbaa" Output: 17
 ============================================================
 APPROACH 1: BRUTE FORCE - Generate All Substrings
 ============================================================
+Approach:
+1. Two nested loops to generate all substrings.
+2. Maintain a frequency array, update incrementally.
+3. For each substring, find max and min non-zero frequencies.
+4. Beauty = maxFreq - minFreq. Add to answer.
+
 Dry Run: s = "aabcb"
   "aab"→ a:2,b:1 → beauty=1
   "aabc"→ a:2,b:1,c:1 → beauty=1
@@ -42,7 +48,10 @@ def beautySum_BruteForce(s: str) -> int:
 ============================================================
 APPROACH 2: OPTIMAL - Incremental Frequency (O(N^2))
 ============================================================
-No known sub-quadratic solution. Scan 26 chars per step = O(1).
+Approach:
+1. Same double-loop with incremental frequency updates.
+2. Scanning 26 entries per step is O(1), total O(N²).
+3. No known sub-quadratic solution exists.
 
 Dry Run: Same incremental approach → Sum = 5  ✓
 

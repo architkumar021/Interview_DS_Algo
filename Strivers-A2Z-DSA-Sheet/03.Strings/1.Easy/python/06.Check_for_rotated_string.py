@@ -35,6 +35,11 @@ def rotateString_BruteForce(s: str, goal: str) -> bool:
 ============================================================
 APPROACH 2: OPTIMAL - Concatenation Check
 ============================================================
+Approach:
+1. If lengths differ, return False.
+2. Concatenate s+s — contains all rotations as substrings.
+3. Check if goal is in s+s using Python's 'in' operator.
+
 Dry Run: s="abcde", goal="cdeab"
   s+s = "abcdeabcde"
   "cdeab" in "abcdeabcde" → True  ✓

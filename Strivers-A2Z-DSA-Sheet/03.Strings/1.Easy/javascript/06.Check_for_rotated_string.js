@@ -33,6 +33,11 @@ function rotateString_BruteForce(s, goal) {
 ============================================================
 APPROACH 2: OPTIMAL - Concatenation Check
 ============================================================
+Approach:
+1. If lengths differ, return false.
+2. Concatenate s+s — it contains all rotations as substrings.
+3. Check if goal exists in s+s using includes().
+
 Dry Run: s="abcde", goal="cdeab"
   s+s = "abcdeabcde"
   "cdeab" found at index 2 → true  ✓

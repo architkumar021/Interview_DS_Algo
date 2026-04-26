@@ -14,9 +14,13 @@ Example 3: Input: "MCMXCIV"  Output: 1994
 ============================================================
 APPROACH 1: BRUTE FORCE - Left to Right with Lookahead
 ============================================================
-Idea:
-- For each symbol, if the next symbol has a higher value, subtract current from next
-  and skip ahead by 2. Otherwise add current and move by 1.
+Approach:
+1. Create a map of Roman symbol → integer value (I=1, V=5, X=10, L=50, C=100, D=500, M=1000).
+2. Traverse the string left to right using index i.
+3. At each position, compare current symbol value with the next symbol value.
+4. If current < next, it's a subtraction case (e.g., IV=4) → add (next - current) to result, and skip ahead by 2.
+5. Otherwise, simply add the current value and move by 1.
+6. Return the result.
 
 Dry Run: s = "MCMXCIV"
   i=0: M=1000, next C=100, 1000>100 → add 1000, res=1000, i=1
@@ -54,9 +58,13 @@ int romanToInt_BruteForce(string s) {
 ============================================================
 APPROACH 2: OPTIMAL - Right to Left Traversal
 ============================================================
-Idea:
-- Traverse from right to left. If current value < previous value, subtract it;
-  otherwise add it.
+Approach:
+1. Create a Roman symbol → value map.
+2. Traverse the string from RIGHT to LEFT, keeping track of the previous value.
+3. If current value < previous value, SUBTRACT it (subtraction case like IV, IX).
+4. Otherwise, ADD it.
+5. Update previous value to current at each step.
+6. Return the accumulated result.
 
 Dry Run: s = "MCMXCIV"
   i=6: V=5, prev=0 → 5≥0 → add, res=5, prev=5

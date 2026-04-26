@@ -46,6 +46,12 @@ function isIsomorphic_BruteForce(s, t) {
 ============================================================
 APPROACH 2: OPTIMAL - Last Seen Position Arrays
 ============================================================
+Approach:
+1. Use two arrays of size 256 to store the last-seen position of each character.
+2. For each index i, if the last-seen positions of s[i] and t[i] differ → return false.
+3. Update both arrays with the current position (i+1).
+4. If no mismatch found, return true.
+
 Dry Run: s="foo", t="bar"
   mapS={}, mapT={}
   i=0: mapS['f']=undefined=mapT['b']=undefined → set both to 1

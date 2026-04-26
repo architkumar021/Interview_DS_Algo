@@ -11,8 +11,12 @@ Example 2: Input: "aabcbaa" Output: 17
 ============================================================
 APPROACH 1: BRUTE FORCE - Generate All Substrings, Count Freq
 ============================================================
-Idea:
-- For each substring, build frequency array from scratch, compute beauty.
+Approach:
+1. Use two nested loops to generate all substrings (i for start, j for end).
+2. For each substring, maintain a frequency array of size 26.
+3. At each step, update the frequency of s[j] and find the max and min non-zero frequencies.
+4. The beauty of that substring = maxFreq - minFreq. Add it to the answer.
+5. Return the total sum.
 
 Dry Run: s = "aabcb"
   Substrings with beauty > 0:
@@ -56,10 +60,12 @@ int beautySum_BruteForce(string s) {
 ============================================================
 APPROACH 2: OPTIMAL - Incremental Frequency Update
 ============================================================
-Idea:
-- Same double loop but maintain frequency array incrementally.
-- This is already O(N^2 * 26) ≈ O(N^2). There is no known sub-quadratic solution.
-- Optimization: use a multiset or sorted structure to avoid scanning 26 each time.
+Approach:
+1. Same double-loop approach, but frequency array is updated incrementally (not rebuilt).
+2. For each outer loop iteration (i), reset the frequency array.
+3. For each inner loop iteration (j), increment freq[s[j]] and scan 26 entries for max/min.
+4. Scanning 26 entries is O(1), making the total O(N²).
+5. No known sub-quadratic solution exists for this problem.
 
 Dry Run: s = "aabcb" (same as above, but freq updated incrementally)
   i=0: freq starts empty

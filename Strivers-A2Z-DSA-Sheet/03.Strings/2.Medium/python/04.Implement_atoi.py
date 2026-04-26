@@ -11,6 +11,13 @@ Example 3: Input: "4193 with words"  Output: 4193
 ============================================================
 APPROACH 1: BRUTE FORCE - Parse Step by Step
 ============================================================
+Approach:
+1. Skip leading whitespace.
+2. Check for optional '+'/'-' sign.
+3. Read consecutive digits, building the number.
+4. Apply sign, then clamp to [INT_MIN, INT_MAX] range.
+5. Return the result.
+
 Dry Run: s = "   -42"
   Skip spaces → i=3
   s[3]='-' → sign=-1, i=4
@@ -61,6 +68,12 @@ def myAtoi_BruteForce(s: str) -> int:
 ============================================================
 APPROACH 2: OPTIMAL - Early overflow detection (no big int)
 ============================================================
+Approach:
+1. Same steps: whitespace → sign → digits.
+2. Before multiplying, check if ans > INT_MAX//10 or (ans == INT_MAX//10 and digit > 7).
+3. If overflow, return INT_MAX or INT_MIN immediately.
+4. Apply sign and return.
+
 Dry Run: s = "2147483648"
   ans builds: 2→21→214→...→214748364
   Next digit=8: 214748364 > 214748364? No. == and 8>7? Yes → overflow

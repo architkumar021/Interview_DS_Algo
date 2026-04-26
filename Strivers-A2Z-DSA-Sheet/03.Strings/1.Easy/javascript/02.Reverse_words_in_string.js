@@ -11,6 +11,13 @@ Example 3: Input: "a good   example"      Output: "example good a"
 ============================================================
 APPROACH 1: BRUTE FORCE - Split, Filter, Reverse
 ============================================================
+Approach:
+1. Trim the string and split by one or more whitespace characters using regex.
+2. This gives an array of words with no empty entries.
+3. Reverse the array.
+4. Join the reversed array with a single space.
+5. Return the result.
+
 Dry Run: s = "  hello world  "
   split(' ') → ["", "", "hello", "world", "", ""]
   filter empty → ["hello", "world"]
@@ -28,6 +35,15 @@ function reverseWords_BruteForce(s) {
 ============================================================
 APPROACH 2: OPTIMAL - Traverse from End, Pick Words
 ============================================================
+Approach:
+1. Start from the end of the string, traversing backwards.
+2. Skip trailing spaces by decrementing the pointer.
+3. When a non-space character is found, mark it as word end (j).
+4. Keep moving left until a space or string start — extract the word from i+1 to j+1.
+5. Append the word to the result with a space separator.
+6. Repeat until the entire string is scanned.
+7. Return the result.
+
 Dry Run: s = "  hello world  "
   i=14, skip spaces → i=12 ('d')
   j=12, move i left to 7 → word = "world", res="world"

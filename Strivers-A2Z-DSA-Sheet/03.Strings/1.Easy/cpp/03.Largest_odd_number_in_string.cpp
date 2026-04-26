@@ -12,13 +12,15 @@ Example 3: Input: "35427" Output: "35427"
 ============================================================
 APPROACH 1: BRUTE FORCE - Check All Substrings
 ============================================================
-Idea:
-- Generate all substrings starting from index 0 with increasing length.
-- The largest odd substring starting from 0 is the one ending at the rightmost odd digit.
-- We can check all suffixes from index 0 to i for each i, but smartly we just need
-  the longest prefix ending with an odd digit.
+Approach:
+1. A number is odd if its last digit is odd (1, 3, 5, 7, 9).
+2. The largest-valued substring starting from index 0 always has a larger value than any other substring.
+3. So we only need to check prefixes: num[0..0], num[0..1], ..., num[0..n-1].
+4. For each prefix, check if the last digit is odd.
+5. Keep updating the answer with the longest valid prefix found.
+6. Return the last (longest) prefix that ended with an odd digit.
 
-Dry Run: num = "35427"
+Dry Run:
   Check all substrings starting from 0:
     "3" → odd ✓  "35" → even  "354" → even  "3542" → even  "35427" → odd ✓
   Largest = "35427" (longest substring from start ending in odd digit)
@@ -50,13 +52,14 @@ string largestOddNumber_BruteForce(string num) {
 ============================================================
 APPROACH 2: OPTIMAL - Scan from Right
 ============================================================
-Idea:
-- A number is odd if its last digit is odd.
-- The largest odd substring of num starting from index 0 is num[0..i] where i is the
-  rightmost index with an odd digit.
-- Just scan from right to left, find first odd digit, return num[0..i].
+Approach:
+1. A number is odd if its last digit is odd.
+2. The largest odd substring must start from index 0 (to maximize value).
+3. We just need to find the rightmost odd digit in the string.
+4. Scan from right to left — the first odd digit found at index i gives us the answer: num[0..i].
+5. If no odd digit exists, return empty string.
 
-Dry Run: num = "35427"
+Dry Run:
   i=4: '7' → odd → return "35427"  ✓
 
 Dry Run: num = "4206"

@@ -37,6 +37,12 @@ function longestCommonPrefix_BruteForce(strs) {
 ============================================================
 APPROACH 2: OPTIMAL - Sort and Compare First & Last
 ============================================================
+Approach:
+1. Sort strings lexicographically.
+2. After sorting, first and last strings are most different.
+3. Their common prefix = common prefix of all strings.
+4. Compare first and last character by character.
+
 Dry Run: strs = ["flower","flow","flight"]
   After sort: ["flight","flow","flower"]
   Compare "flight" vs "flower":

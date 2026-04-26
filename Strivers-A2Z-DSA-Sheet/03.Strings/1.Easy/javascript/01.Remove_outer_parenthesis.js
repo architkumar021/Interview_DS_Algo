@@ -12,6 +12,14 @@ Example 3: Input: s = "()()"   Output: ""
 ============================================================
 APPROACH 1: BRUTE FORCE - Using Stack (Array)
 ============================================================
+Approach:
+1. Initialize an empty array as a stack and an empty result string.
+2. Iterate through each character of the string.
+3. For '(': If stack is NOT empty, it's an inner '(' → add to result. Then push onto stack.
+4. For ')': Pop from stack. If stack is NOT empty after popping, it's an inner ')' → add to result.
+5. The outermost parentheses are skipped because the stack is empty at those points.
+6. Return the result string.
+
 Dry Run: s = "(()())(())"
   i=0: '(' → stack empty → outermost, push → stack=['(']
   i=1: '(' → stack.length=1 > 0 → res+='(' , push → stack=['(','('], res="("
@@ -53,6 +61,12 @@ function removeOuterParentheses_BruteForce(s) {
 ============================================================
 APPROACH 2: OPTIMAL - Counter Variable
 ============================================================
+Approach:
+1. Use an integer counter 'opened' instead of a stack to track the nesting depth.
+2. For '(': If opened > 0, it's inner → add to result. Then increment opened.
+3. For ')': Decrement opened first. If opened > 0 after decrement, it's inner → add to result.
+4. Return the result string.
+
 Dry Run: s = "(()())(())"
   i=0: '(' → opened=0 → skip, opened=1
   i=1: '(' → opened=1>0 → res='(', opened=2

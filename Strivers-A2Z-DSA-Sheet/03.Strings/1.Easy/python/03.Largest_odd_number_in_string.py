@@ -12,6 +12,13 @@ Example 3: Input: "35427" Output: "35427"
 ============================================================
 APPROACH 1: BRUTE FORCE - Check All Prefixes
 ============================================================
+Approach:
+1. A number is odd if its last digit is odd (1, 3, 5, 7, 9).
+2. The largest-valued substring must start from index 0 (prefixes have highest value).
+3. Iterate through all prefixes and check if the last digit is odd.
+4. Keep updating the answer with the longest valid prefix.
+5. Return the result.
+
 Dry Run: num = "35427"
   i=0: "3" → odd → largest="3"
   i=1: "35" → odd → largest="35"
@@ -36,6 +43,10 @@ def largestOddNumber_BruteForce(num: str) -> str:
 ============================================================
 APPROACH 2: OPTIMAL - Scan from Right
 ============================================================
+Approach:
+1. Scan from right to left — the first odd digit at index i gives answer: num[0..i].
+2. If no odd digit exists, return empty string.
+
 Dry Run: num = "35427"
   i=4: '7' is odd → return "35427"  ✓
 

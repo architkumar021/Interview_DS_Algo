@@ -27,6 +27,12 @@ def isAnagram_BruteForce(s: str, t: str) -> bool:
 ============================================================
 APPROACH 2: OPTIMAL - Frequency Count Array
 ============================================================
+Approach:
+1. If lengths differ, return False.
+2. Use a frequency array of size 26.
+3. Increment for each char in s, decrement for each char in t.
+4. If all zeros → anagram.
+
 Dry Run: s="rat", t="car"
   freq after s: r=1, a=1, t=1
   freq after t: c=-1, a=0, r=0 → t still 1 → not all zero → False  ✓

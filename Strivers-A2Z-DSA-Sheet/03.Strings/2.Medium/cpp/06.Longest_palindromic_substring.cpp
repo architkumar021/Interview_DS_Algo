@@ -10,8 +10,11 @@ Example 2: Input: "cbbd"   Output: "bb"
 ============================================================
 APPROACH 1: BRUTE FORCE - Check All Substrings
 ============================================================
-Idea:
-- Generate all substrings, check if each is palindrome, track the longest.
+Approach:
+1. Generate all possible substrings using two nested loops (i for start, j for end).
+2. For each substring, check if it's a palindrome by comparing characters from both ends inward.
+3. Track the longest palindrome found so far (by length and starting index).
+4. Return the longest palindromic substring.
 
 Dry Run: s = "babad"
   Check all substrings:
@@ -56,9 +59,13 @@ string longestPalindrome_BruteForce(string s) {
 ============================================================
 APPROACH 2: OPTIMAL - Expand Around Center
 ============================================================
-Idea:
-- For each index, expand outward for both odd-length and even-length palindromes.
-- Track the longest found.
+Approach:
+1. A palindrome mirrors around its center. There are 2N-1 possible centers:
+   - N centers for odd-length palindromes (single character center).
+   - N-1 centers for even-length palindromes (between two characters).
+2. For each center, expand outward while characters on both sides match.
+3. Track the longest palindrome found during expansion.
+4. Return the longest palindromic substring.
 
 Dry Run: s = "babad"
   i=0: odd expand(0,0): "b"(1). even expand(-1,0): invalid

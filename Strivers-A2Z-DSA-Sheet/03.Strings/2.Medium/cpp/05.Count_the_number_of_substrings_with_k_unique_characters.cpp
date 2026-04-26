@@ -11,8 +11,12 @@ Example 2: Input: S="abaaca", K=1 Output: 7  ("a","b","a","aa","a","c","a")
 ============================================================
 APPROACH 1: BRUTE FORCE - Check All Substrings
 ============================================================
-Idea:
-- Generate all substrings, count distinct chars in each, increment if == k.
+Approach:
+1. Use two nested loops to generate all substrings — outer loop for start index i, inner for end index j.
+2. Maintain a frequency array of size 26 and a distinct character count.
+3. For each new character at j, update frequency and distinct count.
+4. If distinct count equals k, increment the answer.
+5. Return the total count.
 
 Dry Run: S="aba", K=2
   "a"→1 dist, "ab"→2 dist ✓, "aba"→2 dist ✓
@@ -47,10 +51,14 @@ long long substrCount_BruteForce(string s, int k) {
 ============================================================
 APPROACH 2: OPTIMAL - Sliding Window: atMost(k) - atMost(k-1)
 ============================================================
-Idea:
-- exactlyK = atMostK(k) - atMostK(k-1)
-- atMostK uses sliding window: expand right, shrink left when distinct > k.
-- For each j, substrings ending at j with ≤ k distinct = j - i + 1.
+Approach:
+1. Use the trick: exactlyK = atMostK(k) - atMostK(k-1).
+2. atMostK(k) uses a sliding window with two pointers (i, j):
+   - Expand j to the right, adding s[j] to a frequency map.
+   - If distinct characters exceed k, shrink from left (i++) until distinct ≤ k.
+   - For each j, all substrings from i to j (count = j - i + 1) have ≤ k distinct chars.
+3. Call atMostK twice (with k and k-1) and subtract.
+4. Return the difference as the count of substrings with exactly k distinct characters.
 
 Dry Run: S="aba", K=2
   atMost(2):

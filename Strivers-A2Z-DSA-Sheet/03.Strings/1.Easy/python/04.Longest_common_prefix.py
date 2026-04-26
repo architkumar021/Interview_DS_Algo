@@ -38,6 +38,11 @@ def longestCommonPrefix_BruteForce(strs: List[str]) -> str:
 ============================================================
 APPROACH 2: OPTIMAL - Sort and Compare First & Last
 ============================================================
+Approach:
+1. Sort strings lexicographically.
+2. After sorting, first and last are most different.
+3. Compare them character by character — their common prefix = answer.
+
 Dry Run: strs = ["flower","flow","flight"]
   After sort: ["flight","flow","flower"]
   Compare "flight" vs "flower":

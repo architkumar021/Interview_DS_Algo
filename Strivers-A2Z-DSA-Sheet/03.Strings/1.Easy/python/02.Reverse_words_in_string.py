@@ -11,6 +11,12 @@ Example 3: Input: "a good   example"      Output: "example good a"
 ============================================================
 APPROACH 1: BRUTE FORCE - Split and Reverse (Pythonic)
 ============================================================
+Approach:
+1. Use Python's split() which automatically splits on whitespace and removes empty entries.
+2. Reverse the resulting list using slicing [::-1].
+3. Join the reversed list with a single space.
+4. Return the result.
+
 Dry Run: s = "  hello world  "
   split() → ["hello", "world"]  (auto handles multiple spaces)
   reverse → ["world", "hello"]
@@ -28,6 +34,15 @@ def reverseWords_BruteForce(s: str) -> str:
 ============================================================
 APPROACH 2: OPTIMAL - Traverse from End, Pick Words
 ============================================================
+Approach:
+1. Start from the end of the string, traversing backwards.
+2. Skip trailing spaces by decrementing the pointer i.
+3. When a non-space character is found, mark it as word end (j).
+4. Keep moving left until a space or string start — extract word from i+1 to j+1.
+5. Append the word to a result list.
+6. Repeat until the entire string is scanned.
+7. Join the result list with spaces and return.
+
 Dry Run: s = "  hello world  "
   i=14, skip spaces → i=12
   j=12, move i left to 7 → word = s[8:13] = "world", res=["world"]

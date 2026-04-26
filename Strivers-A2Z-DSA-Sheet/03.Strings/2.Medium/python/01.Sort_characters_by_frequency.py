@@ -32,6 +32,11 @@ def frequencySort_BruteForce(s: str) -> str:
 ============================================================
 APPROACH 2: OPTIMAL - Counter + Max Heap
 ============================================================
+Approach:
+1. Count frequency using Counter.
+2. Push (-count, char) pairs into a min-heap (negated to simulate max-heap).
+3. Pop from heap and build result by repeating each character by its count.
+
 Dry Run: s = "tree"
   freq: {'t':1, 'r':1, 'e':2}
   heap (negated): [(-2,'e'),(-1,'r'),(-1,'t')]

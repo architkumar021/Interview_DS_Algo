@@ -11,6 +11,11 @@ Example 3: Input: "MCMXCIV"  Output: 1994
 ============================================================
 APPROACH 1: BRUTE FORCE - Left to Right with Lookahead
 ============================================================
+Approach:
+1. Map each Roman symbol to its integer value.
+2. Traverse left to right. If current value < next value → subtraction case: add (next - current), skip 2.
+3. Otherwise add current value, move by 1.
+
 Dry Run: s = "MCMXCIV"
   i=0: M=1000, next C=100 → 1000>100 → +1000, res=1000
   i=1: C=100, next M=1000 → 100<1000 → +900, res=1900, i=3
@@ -41,6 +46,11 @@ function romanToInt_BruteForce(s) {
 ============================================================
 APPROACH 2: OPTIMAL - Right to Left Traversal
 ============================================================
+Approach:
+1. Traverse from right to left, keeping track of the previous value.
+2. If current < previous → subtract. Otherwise → add.
+3. Update previous to current at each step. Return result.
+
 Dry Run: s = "MCMXCIV"
   i=6: V=5, prev=0 → +5, res=5
   i=5: I=1, prev=5 → 1<5 → -1, res=4

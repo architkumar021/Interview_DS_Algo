@@ -25,6 +25,12 @@ function isAnagram_BruteForce(s, t) {
 ============================================================
 APPROACH 2: OPTIMAL - Frequency Count Array
 ============================================================
+Approach:
+1. If lengths differ, return false.
+2. Use a frequency array of size 26 initialized to 0.
+3. Increment for each char in s, decrement for each char in t.
+4. If all values are 0 at the end → anagram.
+
 Dry Run: s="rat", t="car"
   After processing: r=1,a=0,t=1,c=-1 → not all zero → false  ✓
 

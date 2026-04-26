@@ -11,10 +11,12 @@ Example 2: Input: ["dog","racecar","car"]     Output: ""
 ============================================================
 APPROACH 1: BRUTE FORCE - Vertical Scanning
 ============================================================
-Idea:
-- Compare characters column by column across all strings.
-- For each index i, check if all strings have the same character at position i.
-- Stop when mismatch found or any string ends.
+Approach:
+1. Take the first string as a reference.
+2. For each character index i (column), compare the i-th character across ALL strings.
+3. If any string doesn't have an i-th character, or the character doesn't match, return the prefix found so far.
+4. If all characters at index i match across all strings, continue to index i+1.
+5. If we exhaust the first string without mismatch, the entire first string is the prefix.
 
 Dry Run: strs = ["flower","flow","flight"]
   i=0: 'f','f','f' → all match
@@ -47,11 +49,12 @@ string longestCommonPrefix_BruteForce(vector<string>& strs) {
 ============================================================
 APPROACH 2: OPTIMAL - Sort and Compare First & Last
 ============================================================
-Idea:
-- Sort the array lexicographically.
-- After sorting, the most different strings are at positions 0 and n-1.
-- Compare only first and last string character by character.
-- The common prefix of these two is the answer.
+Approach:
+1. Sort the array of strings lexicographically.
+2. After sorting, the FIRST and LAST strings are the most different from each other.
+3. The common prefix of these two strings is guaranteed to be the common prefix of ALL strings.
+4. Compare the first and last string character by character until a mismatch or end of either string.
+5. Return the common prefix.
 
 Dry Run: strs = ["flower","flow","flight"]
   After sort: ["flight","flow","flower"]

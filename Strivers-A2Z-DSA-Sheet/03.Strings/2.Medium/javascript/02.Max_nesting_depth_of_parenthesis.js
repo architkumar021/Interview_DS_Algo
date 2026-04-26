@@ -10,6 +10,12 @@ Example 2: Input: "(1)+((2))+(((3)))"    Output: 3
 ============================================================
 APPROACH 1: BRUTE FORCE - Using Stack (Array)
 ============================================================
+Approach:
+1. Use an array as a stack to track open parentheses.
+2. On '(': push to stack, update maxD = max(maxD, stack.length).
+3. On ')': pop from stack.
+4. Return the maximum depth recorded.
+
 Dry Run: s = "(1+(2*3)+((8)/4))+1"
   '(' → stack=[1], max=1
   '(' → stack=[1,1], max=2
@@ -42,6 +48,12 @@ function maxDepth_BruteForce(s) {
 ============================================================
 APPROACH 2: OPTIMAL - Counter Variable
 ============================================================
+Approach:
+1. Use an integer counter 'opened' instead of a stack.
+2. On '(': increment opened, update maxD.
+3. On ')': decrement opened.
+4. Return maxD.
+
 Dry Run: s = "(1+(2*3)+((8)/4))+1"
   '(' → opened=1, max=1
   '(' → opened=2, max=2

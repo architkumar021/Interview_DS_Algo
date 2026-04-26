@@ -49,10 +49,12 @@ string frequencySort_BruteForce(string s) {
 ============================================================
 APPROACH 2: OPTIMAL - HashMap + Max Heap (Priority Queue)
 ============================================================
-Idea:
-- Count frequency using a map.
-- Push all (freq, char) pairs into a max-heap.
-- Pop from heap and build result — automatically sorted by frequency.
+Approach:
+1. Count the frequency of each character using a hash map.
+2. Push all (frequency, character) pairs into a max-heap (priority queue).
+3. Pop from the heap — the character with the highest frequency comes first.
+4. Append that character repeated by its frequency to the result.
+5. Repeat until the heap is empty. Return the result.
 
 Dry Run: s = "tree"
   freq: {'t':1, 'r':1, 'e':2}

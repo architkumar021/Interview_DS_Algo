@@ -11,9 +11,12 @@ Example 3: Input: "1+(2*3)/(2-1)"        Output: 1
 ============================================================
 APPROACH 1: BRUTE FORCE - Using Stack
 ============================================================
-Idea:
-- Use a stack to track open parentheses.
-- Push on '(', pop on ')'. Track max stack size.
+Approach:
+1. Use a stack to track open parentheses.
+2. On '(': push to stack, update max depth as max(maxD, stack.size()).
+3. On ')': pop from stack.
+4. Ignore all other characters.
+5. Return the maximum depth recorded.
 
 Dry Run: s = "(1+(2*3)+((8)/4))+1"
   '(' → stack=['('], max=1
@@ -52,9 +55,12 @@ int maxDepth_BruteForce(string s) {
 ============================================================
 APPROACH 2: OPTIMAL - Counter Variable (No Stack)
 ============================================================
-Idea:
-- Replace stack with an integer counter.
-- Increment on '(', update max, decrement on ')'.
+Approach:
+1. Replace the stack with an integer counter 'opened' to track depth.
+2. On '(': increment the counter, then update maxD = max(maxD, opened).
+3. On ')': decrement the counter.
+4. Ignore all other characters.
+5. Return maxD — the maximum depth recorded.
 
 Dry Run: s = "(1+(2*3)+((8)/4))+1"
   '(' → opened=1, max=1

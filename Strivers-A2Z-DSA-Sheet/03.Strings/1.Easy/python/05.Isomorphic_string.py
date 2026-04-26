@@ -41,6 +41,12 @@ def isIsomorphic_BruteForce(s: str, t: str) -> bool:
 ============================================================
 APPROACH 2: OPTIMAL - Last Seen Position Arrays
 ============================================================
+Approach:
+1. Use two lists of size 256 to store the last-seen position of each character.
+2. For each index i, if last-seen positions of s[i] and t[i] differ → return False.
+3. Update both arrays with the current position (i+1).
+4. If no mismatch, return True.
+
 Dry Run: s="foo", t="bar"
   mapS=[0]*256, mapT=[0]*256
   i=0: mapS['f']=0 == mapT['b']=0 → set both to 1
