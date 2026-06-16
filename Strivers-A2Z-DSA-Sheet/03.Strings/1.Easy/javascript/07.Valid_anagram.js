@@ -53,3 +53,45 @@ function isAnagram_Optimal(s, t) {
     return freq.every(v => v === 0);
 }
 
+/*
+============================================================
+APPROACH 3: WITHOUT BUILT-IN - Manual Frequency Count (No .every, no .sort)
+============================================================
+Approach:
+1. If lengths differ, return false.
+2. Create a frequency array of size 26 (manually, no .fill()).
+3. Loop through both strings, increment for s[i], decrement for t[i] using charCodeAt.
+4. Manually loop through the 26 slots to check all are zero (no .every()).
+5. Return true only if all slots are zero.
+
+Dry Run: s="anagram", t="nagaram"
+  freq[0](a): +3 -3 = 0
+  freq[6](g): +1 -1 = 0
+  freq[12](m): +1 -1 = 0
+  freq[13](n): +1 -1 = 0
+  freq[17](r): +1 -1 = 0
+  All zero → true ✓
+
+Dry Run: s="rat", t="car"
+  freq[0](a): +1 -1 = 0
+  freq[2](c): 0 -1 = -1 → not zero → false ✓
+
+Time: O(N) | Space: O(1)
+*/
+
+function isAnagram_WithoutBuiltIn(s, t) {
+    if (s.length !== t.length) return false;
+
+    let freq = [];
+    for (let i = 0; i < 26; i++) freq[i] = 0;
+
+    for (let i = 0; i < s.length; i++) {
+        freq[s.charCodeAt(i) - 97]++;
+        freq[t.charCodeAt(i) - 97]--;
+    }
+
+    for (let i = 0; i < 26; i++) {
+        if (freq[i] !== 0) return false;
+    }
+    return true;
+}

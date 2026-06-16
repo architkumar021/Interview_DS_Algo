@@ -33,6 +33,27 @@ function longestCommonPrefix_BruteForce(strs) {
     return strs[0];
 }
 
+/**
+ * @param {string[]} strs
+ * @return {string}
+ */
+var longestCommonPrefix = function(strs) {
+    let n = strs.length;
+    let ans = '';
+
+    let word = strs[0];
+    for(let i = 0; i < word.length; i++) {
+        let ch = word[i];
+        for(let j = 1; j < n; j++) {
+            let next = strs[j];
+            if(ch === next[i]) continue;
+            else return ans;
+        }
+        ans += ch;
+    }
+    return ans;
+};
+
 /*
 ============================================================
 APPROACH 2: OPTIMAL - Sort and Compare First & Last

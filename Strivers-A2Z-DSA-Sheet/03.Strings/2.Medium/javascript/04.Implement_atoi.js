@@ -30,7 +30,12 @@ Time: O(N) | Space: O(1)
 */
 
 function myAtoi_BruteForce(s) {
-    const INT_MAX = 2147483647, INT_MIN = -2147483648;
+    // const INT_MAX = 2147483647, INT_MIN = -2147483648;
+    const INT_MAX = (1 << 31) - 1;  // Best option
+    const INT_MIN = -(1 << 31);
+
+    // const INT_MAX = Math.pow(2, 31) - 1;
+    // const INT_MIN = -Math.pow(2, 31);
     let i = 0, n = s.length;
 
     // Skip whitespace
@@ -45,7 +50,7 @@ function myAtoi_BruteForce(s) {
     // Read digits
     let ans = 0;
     while (i < n && s[i] >= '0' && s[i] <= '9') {
-        ans = ans * 10 + (s.charCodeAt(i) - 48);
+        ans = ans * 10 + (s[i] - '0');
         if (sign === 1 && ans >= INT_MAX) return INT_MAX;
         if (sign === -1 && ans * -1 <= INT_MIN) return INT_MIN;
         i++;
@@ -87,9 +92,9 @@ function myAtoi_Optimal(s) {
     const limit = Math.floor(INT_MAX / 10);
 
     while (i < n && s[i] >= '0' && s[i] <= '9') {
-        let digit = s.charCodeAt(i) - 48;
+        let digit = s[i] - '0';
 
-        if (ans > limit || (ans === limit && digit > 7)) {
+        if (ans > limit || (ans === limit && digit > INT_MAX % 10)) {
             return sign === 1 ? INT_MAX : INT_MIN;
         }
 

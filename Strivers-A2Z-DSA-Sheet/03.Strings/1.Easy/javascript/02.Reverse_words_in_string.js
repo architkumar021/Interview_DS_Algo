@@ -69,7 +69,10 @@ function reverseWords_Optimal(s) {
         while (i >= 0 && s[i] !== ' ') i--;
 
         // Extract word from i+1 to j
-        let word = s.substring(i + 1, j + 1);
+        let word = '';
+        for (let k = i + 1; k <= j; k++) {
+            word += s[k];
+        }
         if (res.length > 0) res += " ";
         res += word;
     }

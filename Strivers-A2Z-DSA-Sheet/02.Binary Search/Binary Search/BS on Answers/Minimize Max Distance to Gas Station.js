@@ -1,6 +1,9 @@
 // Minimize Max Distance to Gas Station
 
-// We have a horizontal number line. On that number line, we have gas stations at positions stations[0], stations[1], ..., stations[n-1], where n is the size of the stations array. Now, we add k more gas stations so that d, the maximum distance between adjacent gas stations, is minimized. We have to find the smallest possible value of d. Find the answer exactly to 2 decimal places.
+// We have a horizontal number line. On that number line,
+// we have gas stations at positions stations[0], stations[1], ..., stations[n-1], where n is the size of the stations array.
+// Now, we add k more gas stations so that d, the maximum distance between adjacent gas stations, is minimized.
+// We have to find the smallest possible value of d. Find the answer exactly to 2 decimal places.
 // Note: stations is in a strictly increasing order.
 
 // Example 1:

@@ -4,7 +4,9 @@ Given an array `order`, which represents the inorder traversal of a binary searc
 
 **Approach:**
 
-A binary search tree is considered valid if its inorder traversal is in non-decreasing order. We can simply iterate through the `order` array and check if each element is smaller than the next element. If we find any element that is greater than or equal to the next element, the BST is not valid, and we return `false`. Otherwise, we return `true`.
+A binary search tree is considered valid if its inorder traversal is in non-decreasing order.
+ We can simply iterate through the `order` array and check if each element is smaller than the next element.
+ If we find any element that is greater than or equal to the next element, the BST is not valid, and we return `false`. Otherwise, we return `true`.
 
 **Complexity Analysis:**
 

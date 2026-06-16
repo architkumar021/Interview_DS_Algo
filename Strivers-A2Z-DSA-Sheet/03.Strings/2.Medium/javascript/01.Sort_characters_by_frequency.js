@@ -71,3 +71,49 @@ function frequencySort_Optimal(s) {
     return res;
 }
 
+/*
+============================================================
+APPROACH 3: WITHOUT HASHMAP - Frequency Array + Bucket Sort
+============================================================
+Approach:
+1. Use a fixed-size frequency array (size 128 for ASCII) instead of a HashMap/Object.
+2. Scan the frequency array and place each character into a bucket indexed by its count.
+3. Traverse buckets from highest to lowest, appending characters to result.
+4. Avoids dynamic key-value structures — uses only arrays.
+
+Dry Run: s = "tree"
+  freq[116(t)]=1, freq[114(r)]=1, freq[101(e)]=2
+  buckets[1] = ['t','r'], buckets[2] = ['e']
+  i=4: empty, i=3: empty
+  i=2: 'e' → "ee"
+  i=1: 't' → "eet", 'r' → "eetr"
+  Result: "eetr" ✓
+
+Time: O(N) | Space: O(N)
+*/
+
+function frequencySort_WithoutHashMap(s) {
+    // Step 1: Count frequency using fixed ASCII array
+    let freq = new Array(128).fill(0);
+    for (let i = 0; i < s.length; i++) {
+        freq[s.charCodeAt(i)]++;
+    }
+
+    // Step 2: Build buckets
+    let buckets = Array.from({ length: s.length + 1 }, () => []);
+    for (let code = 0; code < 128; code++) {
+        if (freq[code] > 0) {
+            buckets[freq[code]].push(String.fromCharCode(code));
+        }
+    }
+
+    // Step 3: Build result from highest bucket down
+    let res = "";
+    for (let i = s.length; i >= 1; i--) {
+        for (let ch of buckets[i]) {
+            res += ch.repeat(i);
+        }
+    }
+
+    return res;
+}

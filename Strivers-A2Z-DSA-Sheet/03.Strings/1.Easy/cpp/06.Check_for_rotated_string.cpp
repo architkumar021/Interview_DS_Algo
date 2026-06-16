@@ -64,3 +64,44 @@ bool rotateString_Optimal(string s, string goal) {
     return (s + s).find(goal) != string::npos;
 }
 
+/*
+============================================================
+APPROACH 3: WITHOUT BUILT-IN - Manual Substring Search
+============================================================
+Approach:
+1. If lengths differ, return false.
+2. Concatenate s+s to get a string containing all rotations.
+3. Instead of using find(), manually search for goal in the concatenated string:
+   - For each starting index i (0 to n), compare characters one by one.
+   - If all n characters match starting at i, return true.
+4. If no match found, return false.
+
+Dry Run: s="abcde", goal="cdeab"
+  concat = "abcdeabcde", n=5
+  i=0: 'a' vs 'c' → mismatch
+  i=1: 'b' vs 'c' → mismatch
+  i=2: 'c'=='c', 'd'=='d', 'e'=='e', 'a'=='a', 'b'=='b' → all 5 match → true ✓
+
+Time: O(N^2) worst case | Space: O(N) for concatenation
+*/
+
+bool rotateString_WithoutBuiltIn(string s, string goal) {
+    if (s.size() != goal.size()) return false;
+
+    int n = s.size();
+    string concat = s + s;
+
+    for (int i = 0; i <= n; i++) {
+        bool found = true;
+        for (int j = 0; j < n; j++) {
+            if (concat[i + j] != goal[j]) {
+                found = false;
+                break;
+            }
+        }
+        if (found) return true;
+    }
+
+    return false;
+}
+

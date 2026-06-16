@@ -92,6 +92,28 @@ var lengthOfLongestSubstring = function(s) {
 };
 
 var lengthOfLongestSubstring = function(s) {
+    let map = new Map();
+    let count = 0;
+
+    let n = s.length;
+    let i = 0;
+
+    for(let j = 0; j < n; j++) {
+        if(!map.has(s[j])) {
+            count = Math.max(count, j - i + 1);
+        } else {
+            let index = map.get(s[j]);
+            while(i <= index) {
+                map.delete(s[i]);
+                i++;
+            }
+        }
+        map.set(s[j], j);
+    }
+    return count;
+};
+
+var lengthOfLongestSubstring = function(s) {
     let ans = 0;
     const mp = new Map();
     let start = 0;
