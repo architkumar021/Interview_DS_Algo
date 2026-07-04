@@ -1,5 +1,6 @@
 /*QUESTION:
-You are given a string s and an integer k. You can choose any character of the string and change it to any other uppercase English character. You can perform this operation at most k times.
+You are given a string s and an integer k. You can choose any character of the string and change it to
+any other uppercase English character. You can perform this operation at most k times.
 Return the length of the longest substring containing the same letter you can get after performing the above operations.
 
 Example 1:
@@ -11,13 +12,16 @@ APPROACH:
 1. Create a Set ltrs to store all unique letters in the given string s.
 2. Initialize a variable ans to keep track of the maximum length of the substring.
 3. Iterate through each letter ltr in the set ltrs:
-   - Initialize variables start and ltrCnt to track the starting index of the current substring and the count of ltr in the substring.
+   - Initialize variables start and ltrCnt to track the starting index of the current substring and the count of ltr in the
+        substring.
    - Iterate through each character in the string s:
      - If the character is equal to ltr, increment ltrCnt.
-     - Enter a while loop to adjust the start index until the number of characters in the substring that are different from ltr is more than k.
+     - Enter a while loop to adjust the start index until the number of characters in the substring that are different from
+        ltr is more than k.
      - During the adjustment, if the character at the start index is equal to ltr, decrement ltrCnt.
      - Increment the start index.
-     - If the length of the current substring minus ltrCnt is at most k, update ans by taking the maximum of ans and the length of the current substring.
+     - If the length of the current substring minus ltrCnt is at most k, update ans by taking the maximum of ans and the
+        length of the current substring.
 4. Return the maximum length of the substring (ans).
 
 CODE:*/
@@ -49,7 +53,8 @@ var characterReplacement = function(s, k) {
 
 /*
 COMPLEXITY ANALYSIS:
-- Time complexity: O(N * L), where N is the length of the string s and L is the number of unique letters in the string. We iterate through the string and perform the sliding window operation for each unique letter.
+- Time complexity: O(N * L), where N is the length of the string s and L is the number of unique letters in the string.
+    We iterate through the string and perform the sliding window operation for each unique letter.
     - L can have the max value of 26, so we can say the complexity would be O(N * 26) i.e O(N).
 - Space complexity: O(L), as we store the unique letters in the set ltrs.
 */
@@ -136,8 +141,12 @@ class Solution {
             // Update maxCount with the max frequency seen so far
             maxCount = Math.max(maxCount, freq[s.charCodeAt(right) - 65]);
 
-            // If the current window needs more than k replacements, move left
-            while ((right - left + 1) - maxCount > k) {
+            // If the current window needs more than k replacements, slide left by 1
+            // Note: maxCount is intentionally NOT recalculated here — it acts as a
+            // high-watermark. We only care about windows LARGER than the best found,
+            // so the window slides (same size) rather than shrinks. It only grows
+            // when a new character beats the old maxCount.
+            if ((right - left + 1) - maxCount > k) {
                 freq[s.charCodeAt(left) - 65]--;
                 left++;
             }

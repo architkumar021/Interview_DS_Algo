@@ -267,3 +267,83 @@ Key Takeaways:
 */
 
 
+// ==================== OPTIMAL APPROACH (Enhanced - Single Pass with freq) ====================
+/**
+ * Single-pass sliding window — no helper called twice.
+ * Identical pattern to "Binary Subarrays with Sum":
+ *   odd number  ≡  1  (triggers freq reset, changes sum)
+ *   even number ≡  0  (freq carries forward, sum unchanged)
+ *
+ * Core Idea:
+ * For every right pointer, count how many subarrays ending at right have exactly k odd numbers.
+ * After ensuring oddCount ≤ k, the inner while loop strips leading even numbers (and one odd)
+ * from the left boundary — each stripped position is a valid alternative start → stored in freq.
+ *
+ * Why reset freq when nums[right] is odd?
+ *   A new odd number shifts the count, invalidating all previous even-padding offsets.
+ *   We start fresh after the inner while re-establishes a valid window.
+ *
+ * Why carry freq forward when nums[right] is even?
+ *   Adding an even at the right doesn't change oddCount, so every start position
+ *   valid at right-1 is still valid at right — freq naturally accumulates.
+ *
+ * Dry Run: nums = [1,1,2,1,1], k = 3
+ *
+ *   right=0 (1,odd):  oddCount=1, freq=0 (reset). oddCount>3? No. oddCount==3? No. count+=0 → 0
+ *   right=1 (1,odd):  oddCount=2, freq=0 (reset). oddCount>3? No. oddCount==3? No. count+=0 → 0
+ *   right=2 (2,even): oddCount=2, freq=0 (no reset). oddCount>3? No. oddCount==3? No. count+=0 → 0
+ *   right=3 (1,odd):  oddCount=3, freq=0 (reset). oddCount>3? No.
+ *     Inner while: oddCount==3 → strip nums[0]=1(odd) → oddCount=2, left=1, freq=1. Done.
+ *     count+=1 → 1
+ *   right=4 (1,odd):  oddCount=3, freq=0 (reset). oddCount>3? No.
+ *     Inner while: oddCount==3 → strip nums[1]=1(odd) → oddCount=2, left=2, freq=1.
+ *                  oddCount==3? No. Done.
+ *     count+=1 → 2 ✓
+ *
+ * Time Complexity: O(N) — left and right each move forward at most N times
+ * Space Complexity: O(1) — only variables, no extra data structure
+ */
+
+function numberOfSubarraysSinglePass(nums, k) {
+    let left = 0, right = 0;
+    let oddCount = 0, count = 0, freq = 0;
+
+    while (right < nums.length) {
+        // Expand window: include nums[right], // A new odd number invalidates all previous even-padding offsets → reset freq
+        if (nums[right] % 2 !== 0) {
+            oddCount++;
+            freq = 0;
+        }
+
+        // oddCount exceeded k → slide the window: shrink from left by 1
+        if (oddCount > k) {
+            if (nums[left] % 2 !== 0) {
+                oddCount--;
+            }
+            left++;
+        }
+
+        // Window has exactly k odds → strip leading even numbers (and the boundary odd)
+        // from the left. Each stripped position is a valid alternative start → freq++.
+        while (left <= right && oddCount === k) {
+            if (nums[left] % 2 !== 0) {
+                oddCount--;
+            }
+            left++;
+            freq++;
+        }
+
+        // freq = number of valid subarrays ending exactly at right
+        count += freq;
+        right++;
+    }
+
+    return count;
+}
+
+// Driver code
+console.log(numberOfSubarraysSinglePass([1, 1, 2, 1, 1], 3)); // 2
+console.log(numberOfSubarraysSinglePass([2, 4, 6], 1));        // 0
+console.log(numberOfSubarraysSinglePass([2, 2, 2, 1, 2, 2, 1, 2, 2, 2], 2)); // 16
+
+

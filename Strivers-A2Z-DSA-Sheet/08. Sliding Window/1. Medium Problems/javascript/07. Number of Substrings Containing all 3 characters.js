@@ -236,3 +236,40 @@ i=5: lastSeen=[3,4,5], min=3, count=6+4=10
 Answer: 10 substrings containing all three characters.
 ===================================================================================
 */
+
+class Solution {
+    // Function to count substrings containing at least one 'a', 'b', and 'c' using sliding window
+    numberOfSubstrings(s) {
+        // Frequency map for 'a', 'b', 'c'
+        let freq = [0, 0, 0];
+
+        // Left pointer for the sliding window
+        let left = 0;
+
+        // Result to store count of valid substrings
+        let res = 0;
+
+        // Traverse the string with right pointer
+        for (let right = 0; right < s.length; right++) {
+            // Increment frequency of current character
+            freq[s.charCodeAt(right) - 97]++;
+
+            // Shrink the window while all characters are present
+            while (freq[0] > 0 && freq[1] > 0 && freq[2] > 0) {
+                // Add substrings from current right to end
+                res += s.length - right;
+
+                // Move left pointer and update frequency
+                freq[s.charCodeAt(left) - 97]--;
+                left++;
+            }
+        }
+
+        return res;
+    }
+}
+
+// Driver code
+const sol = new Solution();
+const s = "abcabc";
+console.log(sol.numberOfSubstrings(s));

@@ -235,3 +235,82 @@ Iteration 3 (i = 0, rightIndex = 4):
 Answer: 12 (picking cards 5, 6, 1 from the right end)
 ===================================================================================
 */
+/**
+ * @param {number[]} cardPoints
+ * @param {number} k
+ * @return {number}
+ */
+var maxScore = function(cardPoints, k) {
+    let left = 0, right = 0, max = 0;
+    let n = cardPoints.length;
+
+    function findSum(l, r) {
+        let sum = 0;
+        for(let i = l; i <= r; i++) {
+            sum += cardPoints[i];
+        }
+        return sum;
+    }
+
+    const totalSum = findSum(0, n - 1);
+
+    let sum = 0;
+    while(right < n) {
+        sum += cardPoints[right];
+
+        if((right - left + 1) > (n - k)) {
+            sum -= cardPoints[left];
+            left++
+        }
+
+        if((right - left + 1) === (n - k)) {
+            let windowSum = findSum(left, right);
+            max = Math.max(max, totalSum - windowSum);
+        }
+
+        right++;
+    }
+
+    return max;
+};
+
+
+class Solution {
+    // Function to return the maximum score
+    // we can get by picking k cards from either end
+    maxScore(cardPoints, k) {
+        // Get the total number of cards
+        const n = cardPoints.length;
+
+        // Initialize total with sum of first k cards from the start (left end)
+        let total = 0;
+        for (let i = 0; i < k; i++) {
+            total += cardPoints[i];
+        }
+
+        // Store the initial total as the current maximum score
+        let maxPoints = total;
+
+        // We'll now shift the window: remove elements from left end and add from right end
+        for (let i = 0; i < k; i++) {
+            // Subtract the element being removed from the left window
+            total -= cardPoints[k - 1 - i];
+
+            // Add the element being included from the right end
+            total += cardPoints[n - 1 - i];
+
+            // Update the maximum score if current total is greater
+            maxPoints = Math.max(maxPoints, total);
+        }
+
+        // Return the maximum score possible by picking k cards from either end
+        return maxPoints;
+    }
+}
+
+// Driver code
+const sol = new Solution();
+const cards = [1, 2, 3, 4, 5, 6, 1];
+const k = 3;
+console.log(sol.maxScore(cards, k));
+
